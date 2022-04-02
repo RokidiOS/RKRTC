@@ -1,0 +1,4 @@
+framework module RKRTC {
+  header "RKRTC-Swift.h"
+  requires objc
+}
