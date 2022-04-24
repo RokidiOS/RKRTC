@@ -1335,6 +1335,8 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 - (void)enableAudio:(BOOL)enableAudio;
 /// 挂断邀请
 - (void)refuse:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 繁忙
+- (void)busy:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 设置视频流上传参数 ， fps 默认24
 - (void)setPublishResolutionWithWidth:(int32_t)width height:(int32_t)height fps:(int32_t)fps;
 /// 结束、退出频道
@@ -1447,6 +1449,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 - (void)setAudioRouteSpeakerphone:(BOOL)speakerphone;
 - (void)enableAudio:(BOOL)enableAudio;
 - (void)refuse:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)busy:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)setPublishResolutionWithWidth:(int32_t)width height:(int32_t)height fps:(int32_t)fps;
 - (void)dissolutionChannel:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)addRtcClientListener:(id <RKRtcClientListener> _Nonnull)listener;
