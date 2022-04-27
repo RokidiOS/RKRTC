@@ -1240,7 +1240,6 @@ SWIFT_CLASS("_TtC5RKRTC10RKWSClient")
 @interface RKWSClient : NSObject <RKWSProtocol>
 @property (nonatomic, weak) id <RKWSDelegate> _Nullable delegate;
 @property (nonatomic) BOOL autoReconnect;
-@property (nonatomic) BOOL isNeedReconnect;
 - (nonnull instancetype)initWithWsServer:(NSURL * _Nonnull)wsServer OBJC_DESIGNATED_INITIALIZER;
 - (void)sendWithData:(NSData * _Nonnull)data;
 - (void)sendWithDataString:(NSString * _Nonnull)dataString;
@@ -1475,6 +1474,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 - (void)setVideoPublishBitrate:(NSArray<NSArray<NSNumber *> *> * _Nonnull)bitrateMapping16to9 bitrateMapping4to3:(NSArray<NSArray<NSNumber *> *> * _Nonnull)bitrateMapping4to3;
 - (void)dispose;
 @end
+
 
 
 #if __has_attribute(external_source_symbol)

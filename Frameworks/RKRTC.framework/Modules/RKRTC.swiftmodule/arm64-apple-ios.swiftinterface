@@ -586,6 +586,9 @@ extension RKRTC.RKMediaDevice : RKRTC.RKAudioConsumer {
   @objc required override dynamic public init()
   @objc deinit
 }
+extension UIKit.UIDevice {
+  @_Concurrency.MainActor(unsafe) public static func isIPhone11Series() -> Swift.Bool
+}
 @objc public protocol RKAudioConsumer : ObjectiveC.NSObjectProtocol {
   @objc func consumeByteBufferFrame(inputId: Swift.String, sampleRateHz: Swift.Int32, channels: Swift.Int32, data: Swift.Int8, playDelayMS: Swift.Int32, recDelayMS: Swift.Int32, clockDrift: Swift.Int32)
 }
@@ -649,7 +652,6 @@ extension RKRTC.RKMediaDevice : RKRTC.RKAudioConsumer {
 @objc @objcMembers final public class RKWSClient : ObjectiveC.NSObject, RKRTC.RKWSProtocol {
   @objc weak final public var delegate: RKRTC.RKWSDelegate?
   @objc final public var autoReconnect: Swift.Bool
-  @objc final public var isNeedReconnect: Swift.Bool
   @objc deinit
   @objc public init(wsServer: Foundation.URL)
   @objc final public func send(data: Foundation.Data)
