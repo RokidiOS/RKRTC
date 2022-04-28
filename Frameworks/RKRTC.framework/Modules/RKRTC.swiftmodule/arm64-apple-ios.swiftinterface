@@ -284,6 +284,8 @@ extension RKRTC.RKAPIs : Moya.TargetType {
 @objc @_inheritsConvenienceInitializers @objcMembers final public class RKWebRTC : ObjectiveC.NSObject {
   @objc final public var loginSuccessCallBack: RKRTC.RKOnSuccess?
   @objc final public var loginFailCallBack: RKRTC.RKOnFailed?
+  @objc final public var refreshSuccessCallBack: RKRTC.RKOnSuccess?
+  @objc final public var refreshFailCallBack: RKRTC.RKOnFailed?
   @objc final public var autoSubscribe: Swift.Bool
   @objc final public var rtcDevice: RKRTC.RKMediaDevice
   @objc final public var rtcChannel: RKRTC.RKRTCChannel
@@ -623,6 +625,7 @@ extension UIKit.UIDevice {
   @objc var rtcDevice: RKRTC.RKMediaDevice { get }
   @objc var rtcChannel: RKRTC.RKRTCChannel { get }
   @objc func login(saasUrl: Swift.String, wssUrl: Swift.String, userId: Swift.String, token: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func updateToken(_ token: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func enableCamera(_ enableCamera: Swift.Bool)
   @objc func switchCamera()
   @objc func setCameraTorchOn(_ isOn: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
@@ -677,6 +680,7 @@ extension RKRTC.RKWSClient {
 }
 extension RKRTC.RKWebRTC : RKRTC.RKWebRTCInterface {
   @objc final public func login(saasUrl: Swift.String, wssUrl: Swift.String, userId: Swift.String, token: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func updateToken(_ token: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc final public func enableCamera(_ enableCamera: Swift.Bool)
   @objc final public func switchCamera()
   @objc final public func setCameraTorchOn(_ isOn: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)

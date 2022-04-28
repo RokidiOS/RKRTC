@@ -886,6 +886,7 @@ SWIFT_CLASS("_TtC5RKRTC12RKRTCChannel")
 
 
 
+
 @interface RKRTCChannel (SWIFT_EXTENSION(RKRTC)) <RTCVideoViewDelegate>
 - (void)videoView:(id <RTCVideoRenderer> _Nonnull)videoView didChangeVideoSize:(CGSize)size;
 @end
@@ -1286,6 +1287,8 @@ SWIFT_CLASS("_TtC5RKRTC8RKWebRTC")
 @interface RKWebRTC : NSObject
 @property (nonatomic, copy) void (^ _Nullable loginSuccessCallBack)(id _Nullable);
 @property (nonatomic, copy) void (^ _Nullable loginFailCallBack)(NSError * _Nullable);
+@property (nonatomic, copy) void (^ _Nullable refreshSuccessCallBack)(id _Nullable);
+@property (nonatomic, copy) void (^ _Nullable refreshFailCallBack)(NSError * _Nullable);
 @property (nonatomic) BOOL autoSubscribe;
 /// 设备
 @property (nonatomic, strong) RKMediaDevice * _Nonnull rtcDevice;
@@ -1322,6 +1325,16 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 /// \param token 用户token
 ///
 - (void)loginWithSaasUrl:(NSString * _Nonnull)saasUrl wssUrl:(NSString * _Nonnull)wssUrl userId:(NSString * _Nonnull)userId token:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 更新token
+/// <ul>
+///   <li>
+///     Parameters
+///   </li>
+///   <li>
+///     token 用户token
+///   </li>
+/// </ul>
+- (void)updateToken:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 开/关 Camera采集
 - (void)enableCamera:(BOOL)enableCamera;
 /// 切换摄像头
@@ -1442,6 +1455,8 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 @interface RKWebRTC (SWIFT_EXTENSION(RKRTC)) <RKWebRTCInterface>
 /// 登录
 - (void)loginWithSaasUrl:(NSString * _Nonnull)saasUrl wssUrl:(NSString * _Nonnull)wssUrl userId:(NSString * _Nonnull)userId token:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 刷新token
+- (void)updateToken:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)enableCamera:(BOOL)enableCamera;
 - (void)switchCamera;
 - (void)setCameraTorchOn:(BOOL)isOn onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
