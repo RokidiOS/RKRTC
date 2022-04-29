@@ -31,5 +31,5 @@ Pod::Spec.new do |s|
   s.dependency 'Moya'
 
   s.dependency 'Starscream'
-  s.dependency 'WebRTC-lib'
+  # s.dependency 'WebRTC-lib'
   end
