@@ -553,6 +553,8 @@ extension RKRTC.RKMediaDevice : RKRTC.RKAudioConsumer {
 @objc public protocol RKRTCChannelInterface : ObjectiveC.NSObjectProtocol {
   @objc var channelId: Swift.String { get }
   @objc var channelTitle: Swift.String { get }
+  @objc var channelUserList: [RKRTC.RKChannelUserInfo] { get }
+  @objc var autoSubscribe: Swift.Bool { get set }
   @objc func join(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32, maxDelay: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func leave(_ channelId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func invite(userIds: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
@@ -688,7 +690,7 @@ extension RKRTC.RKWebRTC : RKRTC.RKWebRTCInterface {
   @objc final public func enableAudio(_ enableAudio: Swift.Bool)
   @objc final public func refuse(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc final public func busy(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc final public func setPublishResolution(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32 = 30)
+  @objc final public func setPublishResolution(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32 = 24)
   @objc final public func dissolutionChannel(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc final public func addRtcClientListener(_ listener: RKRTC.RKRtcClientListener)
   @objc final public func removeRtcClientListener(_ listener: RKRTC.RKRtcClientListener)

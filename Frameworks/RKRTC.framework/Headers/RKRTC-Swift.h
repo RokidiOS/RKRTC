@@ -927,6 +927,10 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 @property (nonatomic, readonly, copy) NSString * _Nonnull channelId;
 /// 频道title
 @property (nonatomic, readonly, copy) NSString * _Nonnull channelTitle;
+/// 频道成员
+@property (nonatomic, readonly, copy) NSArray<RKChannelUserInfo *> * _Nonnull channelUserList;
+/// 是否自动订阅频道中的成员，默认不自动订阅
+@property (nonatomic) BOOL autoSubscribe;
 /// 加入频道
 - (void)joinWithChannelId:(NSString * _Nonnull)channelId audio:(BOOL)audio video:(BOOL)video password:(NSString * _Nullable)password bitrate:(int32_t)bitrate maxDelay:(int32_t)maxDelay onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 离开房间
