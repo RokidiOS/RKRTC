@@ -33,10 +33,10 @@ public typealias RKOnFailed = (_ error: NSError?) -> Void
     ///   - channelName: 频道名称
     ///   - channelSubject: 频道主题
     ///   - extraParams: 拓展参数
-    ///   - recordParams: 录制参数
     ///   - remark: 三方业务透传字段
     ///   - maxMembers: 频道最大成员数
-    ///   - maxResolution: 最大分辨率 @ RKMaxResolution
+    ///   - maxResolution: 最大分辨率
+    ///   - bitrate: 码率， 默认200kbps
     ///   - onSuccess: 成功回调
     ///   - onFailed: 失败回调
     @objc func channelCreate(userIdList: [String]?,
@@ -45,10 +45,10 @@ public typealias RKOnFailed = (_ error: NSError?) -> Void
                              channelName: String?,
                              channelSubject: String?,
                              extraParams: String?,
-                             recordParams: String?,
                              remark: String?,
-                             maxMembers: Int,
+                             maxMembers: Int32,
                              maxResolution: String,
+                             bitrate: Int32,
                              onSuccess: RKOnSuccess?,
                              onFailed: RKOnFailed?)
     
@@ -58,12 +58,16 @@ public typealias RKOnFailed = (_ error: NSError?) -> Void
     ///   - password: 频道密码
     ///   - sdpOffer: sdpOffer
     ///   - mediaDeviceInfo: @RKMediaDeviceInfo
+    ///   - bitrate: 码率， 默认200kbps
+    ///   - maxDelay: 最大延迟， 默认500ms
     ///   - onSuccess: 成功回调
     ///   - onFailed: 失败回调
     @objc func channelJoin(channelId: String,
                            password: String?,
                            sdpOffer: String,
                            mediaDeviceInfo: String,
+                           bitrate: Int32,
+                           maxDelay: Int32,
                            onSuccess: RKOnSuccess?,
                            onFailed: RKOnFailed?)
     
@@ -148,12 +152,12 @@ public typealias RKOnFailed = (_ error: NSError?) -> Void
     /// - Parameters:
     ///   - channelId: 频道ID
     ///   - userId: 用户id
-    ///   - isHighStram: 是否大流 默认小流
+    ///   - stram: 流类型 默认小流
     ///   - onSuccess: 成功回调
     ///   - onFailed: 失败回调
     @objc func channelSubscribe(channelId: String,
                                 userId: String,
-                                isHighStram: Bool,
+                                stram: RKStreamType,
                                 onSuccess: RKOnSuccess?,
                                 onFailed: RKOnFailed?)
     
@@ -226,6 +230,67 @@ public typealias RKOnFailed = (_ error: NSError?) -> Void
     @objc func getScreenShare(channelId: String,
                               onSuccess: RKOnSuccess?,
                               onFailed: RKOnFailed?)
+    
+    /// 用户流配置修改
+    /// - Parameters:
+    ///   - channelId: 频道Id
+    ///   - bitrate: 码率， 默认2000 kbps
+    ///   - minDelay: 最小延迟 默认10 ms
+    ///   - maxDelay: 最大延迟 默认500 ms
+    ///   - onSuccess: 成功回调
+    ///   - onFailed: 失败回调
+    @objc func channelModifyStreamConfigure(channelId: String,
+                                            bitrate: Int32,
+                                            minDelay: Int32,
+                                            maxDelay: Int32,
+                                            onSuccess: RKOnSuccess?,
+                                            onFailed: RKOnFailed?)
+    /// 批量交换ice
+    /// - Parameters:
+    ///   - channelId: 频道Id
+    ///   - passiveSubscribeUserId: 用户Id
+    ///   - iceCandidateList: iceCandidateList
+    ///   - onSuccess: 成功回调
+    ///   - onFailed: 失败回调
+    @objc func channelIceCandidate(channelId: String,
+                                   passiveSubscribeUserId: String,
+                                   iceCandidateList: [RKIceCandidate],
+                                   onSuccess: RKOnSuccess?,
+                                   onFailed: RKOnFailed?)
+    /// 开启视频录制
+    /// - Parameters:
+    ///   - channelId: 频道ID
+    ///   - resolution: 录制分辨率
+    ///   - subStream: 选择录制大小流 , 默认 low
+    ///   - onSuccess: 成功回调
+    ///   - onFailed: 失败回调
+    @objc func recordingStart(channelId: String,
+                              resolution: String,
+                              subStream: RKStreamType,
+                              bucket: String,
+                              fileName: String,
+                              onSuccess: RKOnSuccess?,
+                              onFailed: RKOnFailed?)
+    
+    /// 结束视频录制
+    /// - Parameters:
+    ///   - channelId: 频道ID
+    ///   - save: save 是否保存视频， 默认保存视频
+    ///   - onSuccess: 成功回调
+    ///   - onFailed: 失败回调
+    @objc func recordingEnd(channelId: String,
+                            save: Bool,
+                            onSuccess: RKOnSuccess?,
+                            onFailed: RKOnFailed?)
+    
+    /// 获取会议内录制的视频列表
+    /// - Parameters:
+    ///   - channelId: 频道ID
+    ///   - onSuccess: 成功回调 [RKRecordingFile]
+    ///   - onFailed: 失败回调
+    @objc func getRecordingList(channelId: String,
+                                onSuccess: RKOnSuccess?,
+                                onFailed: RKOnFailed?)
     
 }
 

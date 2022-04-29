@@ -10,16 +10,24 @@ import UIKit
 @objc public protocol RKRTCChannelInterface: NSObjectProtocol {
     
     /// 频道ID
-    var channelId: String { get }
+    @objc var channelId: String { get }
     
     /// 频道title
-    var channelTitle: String { get }
+    @objc var channelTitle: String { get }
+    
+    /// 频道成员
+    @objc var channelUserList: [RKChannelUserInfo] { get }
+    
+    /// 是否自动订阅频道中的成员，默认不自动订阅
+    @objc var autoSubscribe: Bool { get set }
     
     /// 加入频道
     @objc func join(channelId: String,
                     audio: Bool,
                     video: Bool,
                     password: String?,
+                    bitrate: Int32,
+                    maxDelay: Int32,
                     onSuccess: RKOnSuccess?,
                     onFailed: RKOnFailed?)
     
@@ -29,6 +37,7 @@ import UIKit
                      onFailed: RKOnFailed?)
     
     /// 邀请用户加入频道
+    ///  - onSuccess:  data 返回重复邀请的用户ID
     @objc func invite(userIds: [String],
                       onSuccess: RKOnSuccess?,
                       onFailed: RKOnFailed?)
@@ -75,6 +84,9 @@ import UIKit
     /// 监听频道事件
     @objc func setChannelEventHandler(_ channelEventHandler: RKChannelEventHandler?)
     
+    /// 音视频质量数据回调
+    @objc func setQualityHandler(_ qualityListener: RKAVQualityListener?)
+    
     /// 设置拓展参数
     @objc func setExtraParams(_ extras: String,
                               onSuccess: RKOnSuccess?,
@@ -100,5 +112,7 @@ import UIKit
     @objc func getSpaceUserList(onSuccess: RKOnSuccess?,
                                 onFailed: RKOnFailed?)
     
+    /// 配置视频质量（最大延迟、最大码率 kbps）
+    @objc func configVideoQuality(maxPublishBitrate: Int32, maxDelay: Int32)
 }
 

@@ -62,6 +62,14 @@ import Foundation
     /// - Parameter userId 用户UserId
     @objc optional func onUserStopScreenShare(userId: String)
     
+    /// 屏幕录制开关通知
+    /// - Parameter isOpen 是否打开
+    @objc optional func onRecordingSwitch(_ isOpen: Bool)
+    
+    /// 屏幕录制状态通知
+    /// - Parameter recordingStateData  @RKRecordingStateModel
+    @objc optional func onRecordingStateChanged(_ recordingStateData: RKRecordingStateModel)
+    
     /// 自定义属性发生了变更
     /// - Parameters:
     ///   - userId userId 修改自定义属性的用户UserId
@@ -77,7 +85,13 @@ import Foundation
     @objc optional func onUserPublishVidepSizeChanged(_ userId: String, width: Int32, height: Int32)
     
     /// video 参数回调
-    @objc optional func onOutboundVideoSize(_ userId: String, width: Int32, height: Int32, fps: Int32, rid: String?)
+    @objc optional func onVideoPublishStatus(_ userId: String,
+                                            rid: String?,
+                                            width: Int32,
+                                            height: Int32,
+                                            fps: Int32,
+                                            bitrate: Int32,
+                                            qualityLimitationReason: String?)
     
     /// 频道出现异常，将释放本地频道，通知上层
     /// - Parameter errorCode 错误码

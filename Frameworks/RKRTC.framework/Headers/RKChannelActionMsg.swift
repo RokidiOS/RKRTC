@@ -26,16 +26,14 @@ public class RKChannelActionMsg: NSObject, HandyJSON {
     public var channelSubject: String?
     // 频道拓展参数
     public var extraParams: String?
-    // 频道录制参数
-    public var recordParams: String?
     // 频道透传字段
     public var remark: String?
     // 频道最大成员
-    public var maxMembers: Int32?
+    public var maxMembers: Int?
     // 拒接状态
     public var refuseState: String?
     // 频道最大分辨率
-    public var maxResolution: RKMaxResolution?
+    public var maxResolution: String?
     
     public func mapping(mapper: HelpingMapper) {
         mapper <<<

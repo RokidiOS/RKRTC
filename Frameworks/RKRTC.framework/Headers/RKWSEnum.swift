@@ -15,8 +15,6 @@ public enum RKWSMessageType: String, HandyJSONEnum {
     case CHANNEL_ACTION
     /// 频道消息转发
     case FORWARD
-    /// 媒体建立协议请求
-    case ICE_CANDIDATE
     /// 媒体资源修改转发消息
     case MEDIA_DEVICE
     ///  自定义属性发生变化
@@ -27,6 +25,10 @@ public enum RKWSMessageType: String, HandyJSONEnum {
     case SCREEN_SHARE
     ///  socket相关
     case SOCKET
+    ///  屏幕录制开关通知
+    case RECORDING_SWITCH
+    ///  socket相关
+    case RECORDING_STATE
 }
 
 /// 消息通知
@@ -103,23 +105,6 @@ public enum RKWSMessageType: String, HandyJSONEnum {
 
 // MARK: - channel
 
-/// 分辨率 支持 256x144, 512x288, 640x360, 854x480, 1280x720, 1920x1080
-
-public enum RKMaxResolution: String, HandyJSONEnum {
-    /// 256x144
-    case Resolution_144P = "144P"
-    /// 512x288
-    case Resolution_288P = "288P"
-    /// 640x360
-    case Resolution_360P = "360P"
-    ///  854x480
-    case Resolution_480P = "480P"
-    /// 1280x720
-    case Resolution_720P = "720P"
-    /// 1920x1080
-    case Resolution_1080P = "1080P"
-}
-
 @objc public enum RKVideoRotation: NSInteger, HandyJSONEnum {
     case VideoRotation_0 = 0
     case VideoRotation_90 = 90
@@ -150,5 +135,59 @@ public enum RKMaxResolution: String, HandyJSONEnum {
 @objc public enum RKSocketCode: Int, HandyJSONEnum {
     /// 重复登录的消息，服务端只发送消息不主动断开连接，被T
     case relogin = 20001
+}
+
+/// 大小流
+@objc public enum RKStreamType: Int, HandyJSONEnum {
+    /// 大流
+    case high = 0
+    /// 小流
+    case low
+    
+    public typealias RawValue = String
+    
+    public var rawValue: RawValue {
+        switch self {
+        case .high: return "high"
+        case .low: return "low"
+        }
+    }
+    
+    public init?(rawValue: RawValue) {
+        switch rawValue {
+        case "high": self = .high
+        case "low": self = .low
+        default: self = .low
+        }
+    }
+}
+
+/// 录制状态
+@objc public enum RKRecordingState: Int, HandyJSONEnum {
+    case recording = 0
+    case uploading
+    case done
+    case error
+    
+    public typealias RawValue = String
+    
+    public var rawValue: RawValue {
+        switch self {
+        case .uploading: return "uploading"
+        case .done: return "done"
+        case .error: return "error"
+        case .recording: return "recording"
+        }
+    }
+    
+    public init?(rawValue: RawValue) {
+        switch rawValue {
+        case "uploading": self = .uploading
+        case "done": self = .done
+        case "error": self = .error
+        case "recording": self = .recording
+        default: self = .error
+        }
+    }
 }
 
