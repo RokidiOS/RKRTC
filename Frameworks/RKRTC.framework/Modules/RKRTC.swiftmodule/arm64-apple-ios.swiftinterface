@@ -220,9 +220,6 @@ extension RKRTC.RKAPIs : Moya.TargetType {
   public var method: Moya.Method {
     get
   }
-  public var logLevel: RKILogger.RKLogLevel {
-    get
-  }
   public var task: Moya.Task {
     get
   }
@@ -289,8 +286,8 @@ extension RKRTC.RKAPIs : Moya.TargetType {
   @objc final public var autoSubscribe: Swift.Bool
   @objc final public var rtcDevice: RKRTC.RKMediaDevice
   @objc final public var rtcChannel: RKRTC.RKRTCChannel
-  @objc deinit
   @objc override dynamic public init()
+  @objc deinit
 }
 @objc public protocol RKChannelEventHandler : ObjectiveC.NSObjectProtocol {
   @objc func onUserJoined(user: RKRTC.RKChannelUserInfo)
