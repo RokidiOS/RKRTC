@@ -2,6 +2,7 @@
 // swift-compiler-version: Apple Swift version 5.6 (swiftlang-5.6.0.323.62 clang-1316.0.20.8)
 // swift-module-flags: -target arm64-apple-ios10.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name RKRTC
 import AVFoundation
+import Accelerate
 import Alamofire
 import CommonCrypto
 import CoreGraphics
@@ -197,6 +198,7 @@ public enum RKAPIs {
   case channelReconnection(channelId: Swift.String, sdpOffer: Swift.String?, subscribeUserIdList: [Swift.String])
   case channelModifyStreamConfigure(channelId: Swift.String, bitrate: Swift.Int32 = 2000, minDelay: Swift.Int32 = 10, maxDelay: Swift.Int32 = 500)
   case channelIceCandidate(channelId: Swift.String, passiveSubscribeUserId: Swift.String, iceCandidateList: [RKRTC.RKIceCandidate])
+  case forwardMessage(channelId: Swift.String, userIdList: [Swift.String]?, sendMessageStr: Swift.String)
   case recordingStart(channelId: Swift.String, resolution: Swift.String = "360P", subStream: RKRTC.RKStreamType, bucket: Swift.String, fileName: Swift.String)
   case recordingEnd(channelId: Swift.String, save: Swift.Bool)
   case getRecordingList(channelId: Swift.String)
@@ -297,7 +299,7 @@ extension RKRTC.RKAPIs : Moya.TargetType {
   @objc func onUserKicked(userIds: [Swift.String])
   @objc func onKicked(byUserId: Swift.String)
   @objc func onStop(byUserId: Swift.String)
-  @objc func onChannelMessageReceived(_ message: Swift.String)
+  @objc func onChannelMessageReceived(_ message: Swift.String, fromUserId: Swift.String)
   @objc func onRemoteUserAudioChanged(userId: Swift.String, audio: Swift.Bool)
   @objc func onRemoteUserVideoChanged(userId: Swift.String, video: Swift.Bool)
   @objc optional func onUserStartScreenShare(userId: Swift.String)
@@ -358,6 +360,7 @@ extension RKRTC.RKRTCAPIManager : RKRTC.RKRTCAPIProtocol {
   @objc dynamic public func channelGetSpaceUserList(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func getChannelList(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func channelReconnection(channelId: Swift.String, sdpOffer: Swift.String?, subscribeUserIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func sendChannelForwardMessage(channelId: Swift.String, userIdList: [Swift.String]?, sendMessageStr: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func startScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func stopScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func getScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
@@ -428,7 +431,7 @@ extension RKRTC.RKRTCChannel : RKRTC.RKRTCChannelInterface {
   @objc dynamic public func setQualityHandler(_ qualityListener: RKRTC.RKAVQualityListener?)
   @objc dynamic public func setExtraParams(_ extras: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func getExtraParams(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func sendChannelMsg(msg: Swift.String)
+  @objc dynamic public func sendChannelMsg(msg: Swift.String, userIdList: [Swift.String]? = nil)
   @objc dynamic public func startScreenShare(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32)
   @objc dynamic public func stopScreenShare()
   @objc dynamic public func getChannelUserList() -> [RKRTC.RKChannelUserInfo]
@@ -472,6 +475,7 @@ public typealias RKOnFailed = (_ error: Foundation.NSError?) -> Swift.Void
   @objc func channelGetSpaceUserList(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func getChannelList(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func channelReconnection(channelId: Swift.String, sdpOffer: Swift.String?, subscribeUserIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func sendChannelForwardMessage(channelId: Swift.String, userIdList: [Swift.String]?, sendMessageStr: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func startScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func stopScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func getScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
@@ -568,7 +572,7 @@ extension RKRTC.RKMediaDevice : RKRTC.RKAudioConsumer {
   @objc func setQualityHandler(_ qualityListener: RKRTC.RKAVQualityListener?)
   @objc func setExtraParams(_ extras: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func getExtraParams(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func sendChannelMsg(msg: Swift.String)
+  @objc func sendChannelMsg(msg: Swift.String, userIdList: [Swift.String]?)
   @objc func startScreenShare(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32)
   @objc func stopScreenShare()
   @objc func getChannelUserList() -> [RKRTC.RKChannelUserInfo]

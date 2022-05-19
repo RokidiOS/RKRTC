@@ -216,6 +216,19 @@ public typealias RKOnFailed = (_ error: NSError?) -> Void
                                    onSuccess: RKOnSuccess?,
                                    onFailed: RKOnFailed?)
     
+    /// 发送频道消息
+    /// - Parameters:
+    ///   - channelId: 频道Id
+    ///   - userIdList: 为空则发给会议内所有人（包括自己）
+    ///   - sendMessageStr: 消息内容
+    ///   - onSuccess: 成功回调
+    ///   - onFailed: 失败回调
+    @objc func sendChannelForwardMessage(channelId: String,
+                                         userIdList: [String]?,
+                                         sendMessageStr: String,
+                                         onSuccess: RKOnSuccess?,
+                                         onFailed: RKOnFailed?)
+    
     /// 发起屏幕共享
     @objc func startScreenShare(channelId: String,
                                 onSuccess: RKOnSuccess?,

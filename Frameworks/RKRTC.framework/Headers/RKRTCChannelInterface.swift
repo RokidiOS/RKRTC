@@ -96,8 +96,8 @@ import UIKit
     @objc func getExtraParams(onSuccess: RKOnSuccess?,
                               onFailed: RKOnFailed?)
     
-    /// 发送频道消息
-    @objc func sendChannelMsg(msg: String)
+    /// 发送频道消息给指定用户，userIdList 传空发给频道内所有用户，包括自己
+    @objc func sendChannelMsg(msg: String, userIdList: [String]?)
     
     /// 开启屏幕共享
     @objc func startScreenShare(width: Int32, height: Int32, fps: Int32)

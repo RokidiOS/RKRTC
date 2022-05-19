@@ -348,7 +348,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKChannelEventHandler_")
 /// 频道消息
 /// \param message 消息体 
 ///
-- (void)onChannelMessageReceived:(NSString * _Nonnull)message;
+- (void)onChannelMessageReceived:(NSString * _Nonnull)message fromUserId:(NSString * _Nonnull)fromUserId;
 /// 远端用户音频上传状态变更
 /// \param userId 用户UserId 
 ///
@@ -743,6 +743,18 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) RKRTCAPIMana
 - (void)getChannelListOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 断线重连
 - (void)channelReconnectionWithChannelId:(NSString * _Nonnull)channelId sdpOffer:(NSString * _Nullable)sdpOffer subscribeUserIdList:(NSArray<NSString *> * _Nonnull)subscribeUserIdList onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 发送频道消息
+/// \param channelId 频道Id
+///
+/// \param userIdList 为空则发给会议内所有人（包括自己）
+///
+/// \param sendMessageStr 消息内容
+///
+/// \param onSuccess 成功回调
+///
+/// \param onFailed 失败回调
+///
+- (void)sendChannelForwardMessageWithChannelId:(NSString * _Nonnull)channelId userIdList:(NSArray<NSString *> * _Nullable)userIdList sendMessageStr:(NSString * _Nonnull)sendMessageStr onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 发起屏幕共享
 - (void)startScreenShareWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 结束屏幕共享
@@ -852,6 +864,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) NSString * _Nonnull toke
 /// 获取用户正在进行的频道列表
 - (void)getChannelListOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)channelReconnectionWithChannelId:(NSString * _Nonnull)channelId sdpOffer:(NSString * _Nullable)sdpOffer subscribeUserIdList:(NSArray<NSString *> * _Nonnull)subscribeUserIdList onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)sendChannelForwardMessageWithChannelId:(NSString * _Nonnull)channelId userIdList:(NSArray<NSString *> * _Nullable)userIdList sendMessageStr:(NSString * _Nonnull)sendMessageStr onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)startScreenShareWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)stopScreenShareWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)getScreenShareWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
@@ -968,8 +981,8 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 - (void)setExtraParams:(NSString * _Nonnull)extras onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 获取拓展参数
 - (void)getExtraParamsOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
-/// 发送频道消息
-- (void)sendChannelMsgWithMsg:(NSString * _Nonnull)msg;
+/// 发送频道消息给指定用户，userIdList 传空发给频道内所有用户，包括自己
+- (void)sendChannelMsgWithMsg:(NSString * _Nonnull)msg userIdList:(NSArray<NSString *> * _Nullable)userIdList;
 /// 开启屏幕共享
 - (void)startScreenShareWithWidth:(int32_t)width height:(int32_t)height fps:(int32_t)fps;
 /// 结束屏幕共享
@@ -1015,8 +1028,8 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 - (void)setExtraParams:(NSString * _Nonnull)extras onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 获取拓展参数
 - (void)getExtraParamsOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
-/// 发送频道消息
-- (void)sendChannelMsgWithMsg:(NSString * _Nonnull)msg;
+/// 指定用户发送频道消息
+- (void)sendChannelMsgWithMsg:(NSString * _Nonnull)msg userIdList:(NSArray<NSString *> * _Nullable)userIdList;
 /// 开启屏幕共享
 - (void)startScreenShareWithWidth:(int32_t)width height:(int32_t)height fps:(int32_t)fps;
 /// 结束屏幕共享

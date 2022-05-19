@@ -40,7 +40,7 @@ import Foundation
     
     /// 频道消息
     /// - Parameter message 消息体
-    @objc func onChannelMessageReceived(_ message: String)
+    @objc func onChannelMessageReceived(_ message: String, fromUserId: String)
     
     /// 远端用户音频上传状态变更
     /// - Parameters:
