@@ -429,8 +429,6 @@ SWIFT_CLASS("_TtC5RKRTC13RKChannelInfo")
 @property (nonatomic, copy) NSString * _Nonnull remark;
 @property (nonatomic, copy) NSString * _Nullable channelName;
 @property (nonatomic, copy) NSString * _Nullable channelSubject;
-@property (nonatomic, copy) NSString * _Nullable shareInfo;
-@property (nonatomic, copy) NSString * _Nullable graffitiInfoList;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 

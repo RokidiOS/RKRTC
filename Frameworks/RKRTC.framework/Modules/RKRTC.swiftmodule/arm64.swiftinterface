@@ -142,8 +142,8 @@ extension RKRTC.RKRTCChannel : WebRTC.RTCPeerConnectionDelegate {
   public var maxMembers: Swift.Int?
   public var startTime: Swift.Int64?
   public var endTime: Swift.Int64?
-  @objc public var shareInfo: Swift.String?
-  @objc public var graffitiInfoList: Swift.String?
+  public var shareInfo: [Any?]?
+  public var graffitiInfoList: [Any?]?
   @objc required override dynamic public init()
   @objc deinit
 }
