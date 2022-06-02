@@ -15,3 +15,5 @@
 RTC_EXTERN NSString* const kRTCVideoCodecVp8Name;
 RTC_EXTERN NSString* const kRTCVideoCodecVp9Name;
 RTC_EXTERN NSString* const kRTCVideoCodecAv1Name;
+RTC_EXTERN NSString* const kRTCVideoCodecH264SFName;
+

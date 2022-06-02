@@ -10,6 +10,7 @@
 
 #import <AVFoundation/AVFoundation.h>
 #import <Foundation/Foundation.h>
+#import <WebRTC/RTCAudioFrame.h>
 
 #import <WebRTC/RTCMacros.h>
 
@@ -101,6 +102,12 @@ RTC_OBJC_EXPORT
 
 - (void)audioSession:(RTC_OBJC_TYPE(RTCAudioSession) *)audioSession
     audioUnitStartFailedWithError:(NSError *)error;
+
+/// 音频帧回调
+/// @param audioSession @RTCAudioSession
+/// @param audioFrame @RTCAudioFrame
+- (RTC_OBJC_TYPE(RTCAudioFrame) *)audioSession:(RTC_OBJC_TYPE(RTCAudioSession) *)audioSession
+    didCaptureAudioFrame:(RTC_OBJC_TYPE(RTCAudioFrame) *)audioFrame;
 
 @end
 
@@ -259,6 +266,8 @@ RTC_OBJC_EXPORT
 - (BOOL)setConfiguration:(RTC_OBJC_TYPE(RTCAudioSessionConfiguration) *)configuration
                   active:(BOOL)active
                    error:(NSError **)outError;
+
+- (RTC_OBJC_TYPE(RTCAudioFrame) *)setCaptureAudioFrame:(RTC_OBJC_TYPE(RTCAudioFrame) *)audioFrame;
 
 @end
 

@@ -15,7 +15,6 @@
 #import <WebRTC/RTCMacros.h>
 #import <WebRTC/RTCMutableI420Buffer.h>
 #import <WebRTC/RTCMutableYUVPlanarBuffer.h>
-#import <WebRTC/RTCSSLCertificateVerifier.h>
 #import <WebRTC/RTCVideoCapturer.h>
 #import <WebRTC/RTCVideoCodecInfo.h>
 #import <WebRTC/RTCVideoDecoder.h>
@@ -29,6 +28,7 @@
 #import <WebRTC/RTCVideoRenderer.h>
 #import <WebRTC/RTCYUVPlanarBuffer.h>
 #import <WebRTC/RTCAudioSession.h>
+#import <WebRTC/RTCAudioFrame.h>
 #import <WebRTC/RTCAudioSessionConfiguration.h>
 #import <WebRTC/RTCCameraVideoCapturer.h>
 #import <WebRTC/RTCFileVideoCapturer.h>
@@ -55,7 +55,6 @@
 #import <WebRTC/RTCDataChannelConfiguration.h>
 #import <WebRTC/RTCFieldTrials.h>
 #import <WebRTC/RTCIceCandidate.h>
-#import <WebRTC/RTCIceCandidateErrorEvent.h>
 #import <WebRTC/RTCIceServer.h>
 #import <WebRTC/RTCLegacyStatsReport.h>
 #import <WebRTC/RTCMediaConstraints.h>
@@ -93,5 +92,6 @@
 #import <WebRTC/RTCVideoEncoderAV1.h>
 #import <WebRTC/RTCNativeI420Buffer.h>
 #import <WebRTC/RTCNativeMutableI420Buffer.h>
+#import <WebRTC/RTCVideoEncoderH264SoftWare.h>
 #import <WebRTC/RTCCallbackLogger.h>
 #import <WebRTC/RTCFileLogger.h>

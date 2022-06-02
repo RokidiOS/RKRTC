@@ -268,6 +268,25 @@ SWIFT_PROTOCOL("_TtP5RKRTC15RKAudioConsumer_")
 /// \param clockDrift 时钟漂移
 ///
 - (void)consumeByteBufferFrameWithInputId:(NSString * _Nonnull)inputId sampleRateHz:(int32_t)sampleRateHz channels:(int32_t)channels data:(int8_t)data playDelayMS:(int32_t)playDelayMS recDelayMS:(int32_t)recDelayMS clockDrift:(int32_t)clockDrift;
+/// 开启自定义音频流
+- (void)startCustomAudio;
+- (void)customAudio;
+/// 结束自定义音频流
+- (void)endCustomAudio;
+@end
+
+/// 当前音频输出设备
+typedef SWIFT_ENUM(int32_t, RKAudioDevice, open) {
+  RKAudioDeviceSpeakerPhone = 1,
+  RKAudioDeviceEarpiece = 2,
+  RKAudioDeviceWiredHeadset = 3,
+  RKAudioDeviceBluetooth = 4,
+};
+
+
+SWIFT_CLASS("_TtC5RKRTC12RKAudioFrame")
+@interface RKAudioFrame : NSObject
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
 
@@ -293,7 +312,14 @@ SWIFT_PROTOCOL("_TtP5RKRTC18RKCallEventHandler_")
 - (void)onReceiveCallWithChannelId:(NSString * _Nonnull)channelId channelActionMsg:(RKChannelActionMsg * _Nonnull)channelActionMsg;
 @end
 
-enum RKChannelOperationType : NSInteger;
+@class RKVideoFrame;
+
+SWIFT_PROTOCOL("_TtP5RKRTC20RKCaptureInterceptor_")
+@protocol RKCaptureInterceptor <NSObject>
+- (void)onIntercept:(RKVideoFrame * _Nonnull)buffer;
+@end
+
+enum RKChannelOperationType : int32_t;
 @class RKMediaDeviceInfo;
 
 SWIFT_CLASS("_TtC5RKRTC18RKChannelActionMsg")
@@ -400,8 +426,20 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKChannelEventHandler_")
 - (void)onError:(NSInteger)errorCode;
 @end
 
+
+SWIFT_CLASS("_TtC5RKRTC13RKChannelInfo")
+@interface RKChannelInfo : NSObject
+@property (nonatomic, copy) NSString * _Nonnull maxResolution;
+@property (nonatomic, copy) NSString * _Nonnull channelOwner;
+@property (nonatomic, copy) NSString * _Nonnull recordingSwitch;
+@property (nonatomic, copy) NSString * _Nonnull remark;
+@property (nonatomic, copy) NSString * _Nullable channelName;
+@property (nonatomic, copy) NSString * _Nullable channelSubject;
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
 /// 消息通知
-typedef SWIFT_ENUM(NSInteger, RKChannelOperationType, open) {
+typedef SWIFT_ENUM(int32_t, RKChannelOperationType, open) {
 /// 未知状态
   RKChannelOperationTypeNONE = 0,
 /// 创建会议
@@ -436,6 +474,29 @@ SWIFT_CLASS("_TtC5RKRTC21RKChannelUserInfoList")
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
+
+SWIFT_CLASS("_TtC5RKRTC12RKI420Buffer")
+@interface RKI420Buffer : NSObject
+@property (nonatomic) int32_t chromaWidth;
+@property (nonatomic) int32_t chromaHeight;
+@property (nonatomic) uint8_t const * _Nullable dataY;
+@property (nonatomic) uint8_t const * _Nullable dataU;
+@property (nonatomic) uint8_t const * _Nullable dataV;
+@property (nonatomic) int32_t strideY;
+@property (nonatomic) int32_t strideU;
+@property (nonatomic) int32_t strideV;
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+/// 频道共享类型 0无共享，1屏幕共享，2电子白板，3AR标注，4视频点选
+typedef SWIFT_ENUM(NSInteger, RKIShareType, open) {
+  RKIShareTypeNone = 0,
+  RKIShareTypeScreenShare = 1,
+  RKIShareTypeDoodle = 2,
+  RKIShareTypeSlam = 3,
+  RKIShareTypeVideoPoint = 4,
+};
+
 @class RTCIceCandidate;
 
 SWIFT_CLASS("_TtC5RKRTC14RKIceCandidate")
@@ -446,17 +507,6 @@ SWIFT_CLASS("_TtC5RKRTC14RKIceCandidate")
 @property (nonatomic, copy) NSString * _Nonnull passiveSubscribeUserId;
 @property (nonatomic, readonly, strong) RTCIceCandidate * _Nonnull rtcIceCandidate;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-@end
-
-
-SWIFT_CLASS("_TtC5RKRTC11RKIceServer")
-@interface RKIceServer : NSObject
-@property (nonatomic, copy) NSArray<NSString *> * _Nonnull urlStrings;
-@property (nonatomic, copy) NSString * _Nullable username;
-@property (nonatomic, copy) NSString * _Nullable credential;
-- (nonnull instancetype)initWithUrlStrings:(NSArray<NSString *> * _Nonnull)urlStrings username:(NSString * _Nullable)username credential:(NSString * _Nullable)credential OBJC_DESIGNATED_INITIALIZER;
-- (nonnull instancetype)init SWIFT_UNAVAILABLE;
-+ (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
 
@@ -486,11 +536,13 @@ SWIFT_CLASS("_TtC5RKRTC13RKMediaDevice")
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
+@class RTCAudioSession;
+@class RTCAudioFrame;
 
-
-@interface RKMediaDevice (SWIFT_EXTENSION(RKRTC)) <RKAudioConsumer>
-- (void)consumeByteBufferFrameWithInputId:(NSString * _Nonnull)inputId sampleRateHz:(int32_t)sampleRateHz channels:(int32_t)channels data:(int8_t)data playDelayMS:(int32_t)playDelayMS recDelayMS:(int32_t)recDelayMS clockDrift:(int32_t)clockDrift;
+@interface RKMediaDevice (SWIFT_EXTENSION(RKRTC)) <RTCAudioSessionDelegate>
+- (RTCAudioFrame * _Nonnull)audioSession:(RTCAudioSession * _Nonnull)audioSession didCaptureAudioFrame:(RTCAudioFrame * _Nonnull)audioFrame SWIFT_WARN_UNUSED_RESULT;
 @end
+
 
 @class RTCVideoFrame;
 
@@ -499,8 +551,8 @@ SWIFT_CLASS("_TtC5RKRTC13RKMediaDevice")
 - (void)setSize:(CGSize)size;
 @end
 
-enum RKVideoFormat : NSInteger;
-enum RKVideoRotation : NSInteger;
+enum RKVideoFormat : int32_t;
+enum RKVideoRotation : int32_t;
 
 SWIFT_PROTOCOL("_TtP5RKRTC20RKVideoFrameConsumer_")
 @protocol RKVideoFrameConsumer <NSObject>
@@ -541,6 +593,15 @@ SWIFT_PROTOCOL("_TtP5RKRTC20RKVideoFrameConsumer_")
 @end
 
 
+@interface RKMediaDevice (SWIFT_EXTENSION(RKRTC)) <RKAudioConsumer>
+- (void)startCustomAudio;
+- (void)customAudio;
+- (void)endCustomAudio;
+- (void)consumeByteBufferFrameWithInputId:(NSString * _Nonnull)inputId sampleRateHz:(int32_t)sampleRateHz channels:(int32_t)channels data:(int8_t)data playDelayMS:(int32_t)playDelayMS recDelayMS:(int32_t)recDelayMS clockDrift:(int32_t)clockDrift;
+@end
+
+
+
 SWIFT_CLASS("_TtC5RKRTC17RKMediaDeviceInfo")
 @interface RKMediaDeviceInfo : NSObject
 @property (nonatomic) BOOL audio;
@@ -550,6 +611,7 @@ SWIFT_CLASS("_TtC5RKRTC17RKMediaDeviceInfo")
 @property (nonatomic) int32_t videoWidth;
 @property (nonatomic) int32_t videoHeight;
 @property (nonatomic) BOOL screenShare;
+@property (nonatomic) NSInteger portraitDegree;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -559,20 +621,24 @@ SWIFT_CLASS("_TtC5RKRTC15RKRTCAPIManager")
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
-enum RKStreamType : NSInteger;
+enum RKStreamType : int32_t;
 
 SWIFT_PROTOCOL("_TtP5RKRTC16RKRTCAPIProtocol_")
 @protocol RKRTCAPIProtocol <NSObject>
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) RKRTCAPIManager * _Null_unspecified shared;)
 + (RKRTCAPIManager * _Null_unspecified)shared SWIFT_WARN_UNUSED_RESULT;
 /// token检验
-/// \param token 频道ID
+/// \param sdkId Rtc的固定sdkId
+///
+/// \param userId 用户id
 ///
 /// \param onSuccess 成功回调
 ///
 /// \param onFailed 失败回调
 ///
-- (void)checkTokenWithToken:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)generatorTokenWithSdkId:(NSString * _Nonnull)sdkId userId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 刷新token
+- (void)refreshToken:(NSString * _Nonnull)refreshToken onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 创建频道
 /// \param userIdList 邀请的成员ID列表
 ///
@@ -756,11 +822,98 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) RKRTCAPIMana
 ///
 - (void)sendChannelForwardMessageWithChannelId:(NSString * _Nonnull)channelId userIdList:(NSArray<NSString *> * _Nullable)userIdList sendMessageStr:(NSString * _Nonnull)sendMessageStr onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 发起屏幕共享
-- (void)startScreenShareWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)startScreenShareWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed SWIFT_DEPRECATED_MSG("1.3.0 弃用");
 /// 结束屏幕共享
-- (void)stopScreenShareWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)stopScreenShareWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed SWIFT_DEPRECATED_MSG("1.3.0 弃用");
 /// 获取当前正在开启的屏幕共享
 - (void)getScreenShareWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 频道共享状态上报
+/// <ul>
+///   <li>
+///     channelId: 频道Id
+///   </li>
+///   <li>
+///     shareInfo: 频道共享信息
+///   </li>
+///   <li>
+///     shareType: 共享类型
+///   </li>
+///   <li>
+///     onSuccess: 成功回调
+///   </li>
+///   <li>
+///     onFailed: 失败回调
+///   </li>
+/// </ul>
+- (void)reportShareInfoWithChannelId:(NSString * _Nonnull)channelId promoterUserId:(NSString * _Nonnull)promoterUserId shareInfo:(NSString * _Nonnull)shareInfo shareType:(enum RKIShareType)shareType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 查询频道共享状态
+/// <ul>
+///   <li>
+///     channelId: 频道Id
+///   </li>
+///   <li>
+///     onSuccess: 成功回调
+///   </li>
+///   <li>
+///     onFailed: 失败回调
+///   </li>
+/// </ul>
+- (void)queryReportShareInfoWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 查询频道信息
+/// <ul>
+///   <li>
+///     channelId: 频道Id
+///   </li>
+///   <li>
+///     onSuccess: 成功回调 @RKChannelInfo
+///   </li>
+///   <li>
+///     onFailed: 失败回调
+///   </li>
+/// </ul>
+- (void)queryChannelInfoWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 添加涂鸦信息
+/// <ul>
+///   <li>
+///     channelId: 频道Id
+///   </li>
+///   <li>
+///     graffitiJsonList: 涂鸦信息
+///   </li>
+///   <li>
+///     onSuccess: 成功回调
+///   </li>
+///   <li>
+///     onFailed: 失败回调
+///   </li>
+/// </ul>
+- (void)addChannelGraffitiWithChannelId:(NSString * _Nonnull)channelId promoterUserId:(NSString * _Nullable)promoterUserId graffitiJsonList:(NSArray<NSString *> * _Nonnull)graffitiJsonList onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 查询涂鸦信息
+/// <ul>
+///   <li>
+///     channelId: 频道Id
+///   </li>
+///   <li>
+///     onSuccess: 成功回调
+///   </li>
+///   <li>
+///     onFailed: 失败回调
+///   </li>
+/// </ul>
+- (void)queryChannelGraffitiWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 清空涂鸦信息
+/// <ul>
+///   <li>
+///     channelId: 频道Id
+///   </li>
+///   <li>
+///     onSuccess: 成功回调
+///   </li>
+///   <li>
+///     onFailed: 失败回调
+///   </li>
+/// </ul>
+- (void)clearMeetingGraffitiWithChannelId:(NSString * _Nonnull)channelId promoterUserId:(NSString * _Nullable)promoterUserId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 用户流配置修改
 /// \param channelId 频道Id
 ///
@@ -827,8 +980,12 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) RKRTCAPIMana
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) NSString * _Nonnull token;)
 + (NSString * _Nonnull)token SWIFT_WARN_UNUSED_RESULT;
 + (void)setToken:(NSString * _Nonnull)value;
-/// token合法性校验
-- (void)checkTokenWithToken:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 获取配置
+- (void)getInitConfigOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 获取token
+- (void)generatorTokenWithSdkId:(NSString * _Nonnull)sdkId userId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 刷新token
+- (void)refreshToken:(NSString * _Nonnull)refreshToken onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 创建频道
 - (void)channelCreateWithUserIdList:(NSArray<NSString *> * _Nullable)userIdList password:(NSString * _Nullable)password thirdChannelId:(NSString * _Nullable)thirdChannelId channelName:(NSString * _Nullable)channelName channelSubject:(NSString * _Nullable)channelSubject extraParams:(NSString * _Nullable)extraParams remark:(NSString * _Nullable)remark maxMembers:(int32_t)maxMembers maxResolution:(NSString * _Nonnull)maxResolution bitrate:(int32_t)bitrate onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 加入频道
@@ -868,6 +1025,12 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) NSString * _Nonnull toke
 - (void)startScreenShareWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)stopScreenShareWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)getScreenShareWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)reportShareInfoWithChannelId:(NSString * _Nonnull)channelId promoterUserId:(NSString * _Nonnull)promoterUserId shareInfo:(NSString * _Nonnull)shareInfo shareType:(enum RKIShareType)shareType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)queryReportShareInfoWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)queryChannelInfoWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)addChannelGraffitiWithChannelId:(NSString * _Nonnull)channelId promoterUserId:(NSString * _Nullable)promoterUserId graffitiJsonList:(NSArray<NSString *> * _Nonnull)graffitiJsonList onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)queryChannelGraffitiWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)clearMeetingGraffitiWithChannelId:(NSString * _Nonnull)channelId promoterUserId:(NSString * _Nullable)promoterUserId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 用户流配置修改
 - (void)channelModifyStreamConfigureWithChannelId:(NSString * _Nonnull)channelId bitrate:(int32_t)bitrate minDelay:(int32_t)minDelay maxDelay:(int32_t)maxDelay onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 批量交换ice
@@ -876,7 +1039,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) NSString * _Nonnull toke
 - (void)recordingStartWithChannelId:(NSString * _Nonnull)channelId resolution:(NSString * _Nonnull)resolution subStream:(enum RKStreamType)subStream bucket:(NSString * _Nonnull)bucket fileName:(NSString * _Nonnull)fileName onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 结束视频录制
 - (void)recordingEndWithChannelId:(NSString * _Nonnull)channelId save:(BOOL)save onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
-/// 获取会议内录制的视频列表
+/// 获取频道内录制的视频列表
 - (void)getRecordingListWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 @end
 
@@ -1039,6 +1202,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 /// 查询房间成员并订阅
 - (void)getSpaceUserListOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)configVideoQualityWithMaxPublishBitrate:(int32_t)maxPublishBitrate maxDelay:(int32_t)maxDelay;
+- (void)publishDeviceDirectio;
 @end
 
 
@@ -1085,25 +1249,8 @@ typedef SWIFT_ENUM(NSInteger, RKRTCCode, open) {
   RKRTCCodeUSER_LIST_IS_EMPTY = 10017,
 };
 
-@class NSURL;
-
-SWIFT_CLASS("_TtC5RKRTC18RKRTCConfigManager")
-@interface RKRTCConfigManager : NSObject
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) RKRTCConfigManager * _Nonnull shared;)
-+ (RKRTCConfigManager * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
-+ (void)setShared:(RKRTCConfigManager * _Nonnull)value;
-@property (nonatomic, copy) NSArray<RKIceServer *> * _Nonnull iceServers;
-@property (nonatomic, copy) NSURL * _Nullable apiServer;
-@property (nonatomic, copy) NSURL * _Nullable sessionServer;
-@property (nonatomic, copy) NSString * _Nonnull userId;
-@property (nonatomic, copy) NSString * _Nonnull token;
-/// 超时 30s
-@property (nonatomic) int32_t iceConnectionTimeout;
-- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
-@end
-
 /// RTCClient state
-typedef SWIFT_ENUM(NSInteger, RKRTCConnectionState, open) {
+typedef SWIFT_ENUM(int32_t, RKRTCConnectionState, open) {
   RKRTCConnectionStateNew = 0,
   RKRTCConnectionStateChecking = 1,
   RKRTCConnectionStateConnected = 2,
@@ -1138,7 +1285,7 @@ SWIFT_CLASS("_TtC5RKRTC15RKRecordingFile")
 @end
 
 /// 录制状态
-typedef SWIFT_ENUM(NSInteger, RKRecordingState, open) {
+typedef SWIFT_ENUM(int32_t, RKRecordingState, open) {
   RKRecordingStateRecording = 0,
   RKRecordingStateUploading = 1,
   RKRecordingStateDone = 2,
@@ -1179,20 +1326,20 @@ typedef SWIFT_ENUM(int32_t, RKScaleType, open) {
   RKScaleTypeSCALE_ASPECT_BALANCED = 2,
 };
 
-typedef SWIFT_ENUM(NSInteger, RKSocketCode, open) {
+typedef SWIFT_ENUM(int32_t, RKSocketCode, open) {
 /// 重复登录的消息，服务端只发送消息不主动断开连接，被T
   RKSocketCodeRelogin = 20001,
 };
 
 /// 大小流
-typedef SWIFT_ENUM(NSInteger, RKStreamType, open) {
+typedef SWIFT_ENUM(int32_t, RKStreamType, open) {
 /// 大流
   RKStreamTypeHigh = 0,
 /// 小流
   RKStreamTypeLow = 1,
 };
 
-typedef SWIFT_ENUM(NSInteger, RKVideoFormat, open) {
+typedef SWIFT_ENUM(int32_t, RKVideoFormat, open) {
   RKVideoFormatI420 = 1,
   RKVideoFormatIYUV = 2,
   RKVideoFormatRGB24 = 3,
@@ -1213,7 +1360,18 @@ typedef SWIFT_ENUM(NSInteger, RKVideoFormat, open) {
 };
 
 
-typedef SWIFT_ENUM(NSInteger, RKVideoRotation, open) {
+SWIFT_CLASS("_TtC5RKRTC12RKVideoFrame")
+@interface RKVideoFrame : NSObject
+@property (nonatomic) int32_t width;
+@property (nonatomic) int32_t height;
+@property (nonatomic) int64_t timeStampNs;
+@property (nonatomic) int32_t chromaWidth;
+@property (nonatomic, strong) RKI420Buffer * _Nullable i420Buffer;
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+
+typedef SWIFT_ENUM(int32_t, RKVideoRotation, open) {
   RKVideoRotationVideoRotation_0 = 0,
   RKVideoRotationVideoRotation_90 = 90,
   RKVideoRotationVideoRotation_180 = 180,
@@ -1232,6 +1390,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC13RKVideoSource_")
 @end
 
 @protocol RKWSDelegate;
+@class NSURL;
 @class NSData;
 
 SWIFT_PROTOCOL("_TtP5RKRTC12RKWSProtocol_")
@@ -1325,6 +1484,7 @@ SWIFT_CLASS("_TtC5RKRTC8RKWebRTC")
 
 
 
+
 SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 @protocol RKWebRTCInterface <NSObject>
 @property (nonatomic) BOOL autoSubscribe;
@@ -1333,15 +1493,15 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 /// 频道
 @property (nonatomic, readonly, strong) RKRTCChannel * _Nonnull rtcChannel;
 /// 登录
-/// \param saasUrl saas地址
+/// \param appId appId
 ///
-/// \param wssUrl websocket地址
+/// \param apiServer 服务地址
 ///
 /// \param userId 用户token
 ///
 /// \param token 用户token
 ///
-- (void)loginWithSaasUrl:(NSString * _Nonnull)saasUrl wssUrl:(NSString * _Nonnull)wssUrl userId:(NSString * _Nonnull)userId token:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)loginWith:(NSString * _Nonnull)appId apiServer:(NSString * _Nonnull)apiServer userId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 更新token
 /// <ul>
 ///   <li>
@@ -1351,7 +1511,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 ///     token 用户token
 ///   </li>
 /// </ul>
-- (void)updateToken:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)updateToken:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed SWIFT_DEPRECATED_MSG("1.3.0 弃用");
 /// 开/关 Camera采集
 - (void)enableCamera:(BOOL)enableCamera;
 /// 切换摄像头
@@ -1378,6 +1538,10 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 - (void)addCallEventHandler:(id <RKCallEventHandler> _Nonnull)listener;
 /// 移除被叫监听
 - (void)removeCallEventHandler:(id <RKCallEventHandler> _Nonnull)listener;
+/// 添加视频原始数据回调
+- (void)addCaptureInterceptor:(id <RKCaptureInterceptor> _Nonnull)listener;
+/// 移除视频原始数据回调
+- (void)removeCaptureInterceptor:(id <RKCaptureInterceptor> _Nonnull)listener;
 /// 自定义视频源
 - (void)setVideoSource:(id <RKVideoSource> _Nonnull)source;
 /// 停止自定义视频流
@@ -1390,6 +1554,13 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 - (void)findJoinedChannelOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 对焦 xPercent 归一化坐标  yPercent 归一化坐标
 - (void)focusWithXPercent:(float)xPercent yPercent:(float)yPercent;
+/// 输出到指定音频设备
+/// \param device @RKAudioDevice 
+///
+- (void)selectAudioWithDevice:(enum RKAudioDevice)device;
+/// 获取所有可输出设备
+/// 返回 [RKAudioDevice]
+- (NSArray * _Nonnull)getAllAudioDevice SWIFT_WARN_UNUSED_RESULT;
 /// 离开频道， 用于离开登录返回的已经在的频道
 /// \param channelId 频道ID 
 ///
@@ -1464,14 +1635,22 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 ///   </li>
 /// </ul>
 - (void)setVideoPublishBitrate:(NSArray<NSArray<NSNumber *> *> * _Nonnull)bitrateMapping16to9 bitrateMapping4to3:(NSArray<NSArray<NSNumber *> *> * _Nonnull)bitrateMapping4to3;
+/// 上报log
+/// \param onSuccess 成功回调filePath
+///
+/// \param onFailed 失败回调
+///
+- (void)uploadLogOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 释放SDK，释放后需要走完整的SDK初始化登录流程
 - (void)dispose;
 @end
 
 
 @interface RKWebRTC (SWIFT_EXTENSION(RKRTC)) <RKWebRTCInterface>
+/// 上报log
+- (void)uploadLogOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 登录
-- (void)loginWithSaasUrl:(NSString * _Nonnull)saasUrl wssUrl:(NSString * _Nonnull)wssUrl userId:(NSString * _Nonnull)userId token:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)loginWith:(NSString * _Nonnull)appId apiServer:(NSString * _Nonnull)apiServer userId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 刷新token
 - (void)updateToken:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)enableCamera:(BOOL)enableCamera;
@@ -1487,6 +1666,8 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 - (void)removeRtcClientListener:(id <RKRtcClientListener> _Nonnull)listener;
 - (void)addCallEventHandler:(id <RKCallEventHandler> _Nonnull)listener;
 - (void)removeCallEventHandler:(id <RKCallEventHandler> _Nonnull)listener;
+- (void)addCaptureInterceptor:(id <RKCaptureInterceptor> _Nonnull)listener;
+- (void)removeCaptureInterceptor:(id <RKCaptureInterceptor> _Nonnull)listener;
 - (void)setVideoSource:(id <RKVideoSource> _Nonnull)source;
 - (void)stopVideoSource;
 - (void)setAudioSource:(id <RKAudioSource> _Nonnull)source;
@@ -1495,6 +1676,9 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 - (void)adjustPlaybackVolume:(double)volume;
 - (void)findJoinedChannelOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)focusWithXPercent:(float)xPercent yPercent:(float)yPercent;
+/// 输出到指定音频设备
+- (void)selectAudioWithDevice:(enum RKAudioDevice)device;
+- (NSArray * _Nonnull)getAllAudioDevice SWIFT_WARN_UNUSED_RESULT;
 - (void)leaveWithChannelId:(NSString * _Nonnull)channelId;
 /// 开启频道录制
 - (void)startServerRecording:(NSString * _Nonnull)channelId resolution:(NSString * _Nonnull)resolution subStream:(enum RKStreamType)subStream bucket:(NSString * _Nonnull)bucket fileName:(NSString * _Nonnull)fileName onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
