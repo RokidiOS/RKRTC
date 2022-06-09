@@ -26,6 +26,8 @@ RTC_OBJC_EXPORT
 
 + (NSArray<RTC_OBJC_TYPE(RTCVideoCodecInfo) *> *)supportedCodecs;
 
+
+//+ (NSArray<RTC_OBJC_TYPE(RTCVideoCodecInfo) *> *)supportedCodecs1;
 @end
 
 NS_ASSUME_NONNULL_END

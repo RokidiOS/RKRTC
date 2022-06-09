@@ -39,6 +39,8 @@ RTC_OBJC_EXPORT
  */
 @property(nonatomic, nullable) NSValue* rotationOverride;
 
++ (BOOL)isMetalAvailable;
+
 @end
 
 NS_ASSUME_NONNULL_END

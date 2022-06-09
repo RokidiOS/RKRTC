@@ -10,7 +10,7 @@
 
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-
+#import <AVFoundation/AVFoundation.h>
 #import <WebRTC/RTCMacros.h>
 
 @class AVCaptureSession;
@@ -26,5 +26,7 @@ RTC_OBJC_EXPORT
  *  queue that the AVCaptureSession is started/stopped.
  */
 @property(nonatomic, strong) AVCaptureSession* captureSession;
+
+@property(nonatomic, readonly) AVCaptureVideoPreviewLayer *previewLayer;
 
 @end

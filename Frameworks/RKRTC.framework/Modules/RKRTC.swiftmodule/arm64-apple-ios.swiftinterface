@@ -1,5 +1,5 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.5.2 (swiftlang-1300.0.47.5 clang-1300.0.29.30)
+// swift-compiler-version: Apple Swift version 5.6.1 (swiftlang-5.6.0.323.66 clang-1316.0.20.12)
 // swift-module-flags: -target arm64-apple-ios10.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name RKRTC
 import AVFoundation
 import AWSCore
@@ -36,10 +36,10 @@ extension RKRTC.RKRTCChannel : WebRTC.RTCVideoViewDelegate {
   @objc dynamic public func videoView(_ videoView: WebRTC.RTCVideoRenderer, didChangeVideoSize size: CoreGraphics.CGSize)
 }
 @objc public protocol RKChannelEventHandler : ObjectiveC.NSObjectProtocol {
-  @objc func onUserJoined(user: RKRTC.RKChannelUserInfo)
+  @objc func onUserJoined(user: RKRTC.RKChannelUserInfo, inviteUserId: Swift.String?)
   @objc func onUserLeft(userId: Swift.String)
-  @objc func onUserRefused(userId: Swift.String)
-  @objc func onUserBusy(userId: Swift.String)
+  @objc func onUserRefused(userId: Swift.String, inviteUserId: Swift.String)
+  @objc func onUserBusy(userId: Swift.String, inviteUserId: Swift.String)
   @objc func onUserKicked(userIds: [Swift.String])
   @objc func onKicked(byUserId: Swift.String)
   @objc func onStop(byUserId: Swift.String)
@@ -158,8 +158,8 @@ extension RKRTC.RKRTCChannel : WebRTC.RTCPeerConnectionDelegate {
   @objc deinit
 }
 extension RKRTC.RKRTCChannel : RKRTC.RKRTCChannelInterface {
-  @objc dynamic public func join(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32 = 2000, maxDelay: Swift.Int32 = 0, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func realJoin(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32, maxDelay: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func join(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32 = 2000, maxDelay: Swift.Int32 = 0, inviteUserId: Swift.String? = nil, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func realJoin(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32, maxDelay: Swift.Int32, inviteUserId: Swift.String? = nil, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func leave(_ channelId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func invite(userIds: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func kick(userIds: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
@@ -208,6 +208,7 @@ public enum RKWSMessageType : Swift.String, RKIHandyJSON.HandyJSONEnum {
   case LEAVE
   case KICK
   case REFUSE
+  case CALL_CANCEL
   case END
   public typealias RawValue = Swift.String
   public var rawValue: RKRTC.RKChannelOperationType.RawValue {
@@ -393,12 +394,13 @@ public enum RKRTCAPIs {
   case generatorToken(_: Swift.String, userId: Swift.String)
   case refreshToken(_: Swift.String)
   case channelCreate(userIdList: [Swift.String]?, password: Swift.String?, thirdChannelId: Swift.String?, channelName: Swift.String?, channelSubject: Swift.String?, extraParams: Swift.String?, remark: Swift.String?, maxMembers: Swift.Int32 = 16, maxResolution: Swift.String = "360P", bitrate: Swift.Int32 = 2000)
-  case channelJoin(channelId: Swift.String, password: Swift.String?, sdpOffer: Swift.String, mediaDeviceInfo: Swift.String, bitrate: Swift.Int32 = 2000, minDelay: Swift.Int32 = 10, maxDelay: Swift.Int32 = 0)
+  case channelJoin(channelId: Swift.String, password: Swift.String?, sdpOffer: Swift.String, mediaDeviceInfo: Swift.String, bitrate: Swift.Int32 = 2000, minDelay: Swift.Int32 = 10, maxDelay: Swift.Int32 = 0, inviteUserId: Swift.String? = nil)
   case channelInvite(channelId: Swift.String, userIdList: [Swift.String])
+  case channelCancelInvite(channelId: Swift.String, cancelUserIdList: [Swift.String])
   case channelLeave(channelId: Swift.String)
   case channelEnd(channelId: Swift.String)
   case channelKick(channelId: Swift.String, userIdList: [Swift.String])
-  case channelRefuse(channelId: Swift.String, refuseState: Swift.String)
+  case channelRefuse(channelId: Swift.String, refuseState: Swift.String, inviteUserId: Swift.String)
   case channelSetExtraParams(channelId: Swift.String, extraParams: Swift.String)
   case channelGetExtraParams(channelId: Swift.String)
   case channelSubscribe(channelId: Swift.String, userId: Swift.String, stream: Swift.String = "low")
@@ -454,13 +456,14 @@ public typealias RKOnFailed = (_ error: Foundation.NSError?) -> Swift.Void
   @objc func generatorToken(sdkId: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func refreshToken(_ refreshToken: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func channelCreate(userIdList: [Swift.String]?, password: Swift.String?, thirdChannelId: Swift.String?, channelName: Swift.String?, channelSubject: Swift.String?, extraParams: Swift.String?, remark: Swift.String?, maxMembers: Swift.Int32, maxResolution: Swift.String, bitrate: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelJoin(channelId: Swift.String, password: Swift.String?, sdpOffer: Swift.String, mediaDeviceInfo: Swift.String, bitrate: Swift.Int32, maxDelay: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelJoin(channelId: Swift.String, password: Swift.String?, sdpOffer: Swift.String, mediaDeviceInfo: Swift.String, bitrate: Swift.Int32, maxDelay: Swift.Int32, inviteUserId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func channelInvite(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelCancelInvite(channelId: Swift.String, cancelUserIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func channelLeave(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func channelEnd(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func channelKick(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelRefuse(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelBusy(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelRefuse(channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelBusy(channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func channelSetExtraParams(channelId: Swift.String, extraParams: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func channelGetExtraParams(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func channelSubscribe(channelId: Swift.String, userId: Swift.String, stram: RKRTC.RKStreamType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
@@ -517,7 +520,7 @@ public typealias RKOnFailed = (_ error: Foundation.NSError?) -> Swift.Void
   @objc var channelTitle: Swift.String { get }
   @objc var channelUserList: [RKRTC.RKChannelUserInfo] { get }
   @objc var autoSubscribe: Swift.Bool { get set }
-  @objc func join(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32, maxDelay: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func join(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32, maxDelay: Swift.Int32, inviteUserId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func leave(_ channelId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func invite(userIds: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func kick(userIds: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
@@ -571,6 +574,7 @@ public typealias RKOnFailed = (_ error: Foundation.NSError?) -> Swift.Void
   @objc public var remark: Swift.String?
   public var maxMembers: Swift.Int?
   @objc public var refuseState: Swift.String?
+  @objc public var inviteUserId: Swift.String?
   @objc public var maxResolution: Swift.String?
   public func mapping(mapper: RKIHandyJSON.HelpingMapper)
   @objc required override dynamic public init()
@@ -585,8 +589,8 @@ extension RKRTC.RKWebRTC : RKRTC.RKWebRTCInterface {
   @objc final public func setCameraTorchOn(_ isOn: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc final public func setAudioRouteSpeakerphone(_ speakerphone: Swift.Bool)
   @objc final public func enableAudio(_ enableAudio: Swift.Bool)
-  @objc final public func refuse(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc final public func busy(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func refuse(_ channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func busy(_ channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc final public func setPublishResolution(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32 = 24)
   @objc final public func dissolutionChannel(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc final public func addRtcClientListener(_ listener: RKRTC.RKRtcClientListener)
@@ -642,13 +646,14 @@ extension RKRTC.RKRTCAPIManager : RKRTC.RKRTCAPIProtocol {
   @objc dynamic public func generatorToken(sdkId: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func refreshToken(_ refreshToken: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func channelCreate(userIdList: [Swift.String]?, password: Swift.String?, thirdChannelId: Swift.String?, channelName: Swift.String?, channelSubject: Swift.String?, extraParams: Swift.String?, remark: Swift.String?, maxMembers: Swift.Int32, maxResolution: Swift.String, bitrate: Swift.Int32 = 2000, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelJoin(channelId: Swift.String, password: Swift.String?, sdpOffer: Swift.String, mediaDeviceInfo: Swift.String, bitrate: Swift.Int32 = 2000, maxDelay: Swift.Int32 = 0, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelJoin(channelId: Swift.String, password: Swift.String?, sdpOffer: Swift.String, mediaDeviceInfo: Swift.String, bitrate: Swift.Int32 = 2000, maxDelay: Swift.Int32 = 0, inviteUserId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func channelInvite(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelCancelInvite(channelId: Swift.String, cancelUserIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func channelLeave(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func channelEnd(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func channelKick(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelRefuse(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelBusy(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelRefuse(channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelBusy(channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func channelSetExtraParams(channelId: Swift.String, extraParams: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func channelGetExtraParams(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc dynamic public func channelSubscribe(channelId: Swift.String, userId: Swift.String, stram: RKRTC.RKStreamType = .low, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
@@ -716,6 +721,7 @@ extension RKRTC.RKWSClient {
 }
 @objc public protocol RKCallEventHandler : ObjectiveC.NSObjectProtocol {
   @objc func onReceiveCall(channelId: Swift.String, channelActionMsg: RKRTC.RKChannelActionMsg)
+  @objc func onCallCanceled(channelId: Swift.String, userId: Swift.String)
 }
 @_inheritsConvenienceInitializers @objcMembers @objc public class RKVideoFrame : ObjectiveC.NSObject {
   @objc public var width: Swift.Int32
@@ -783,8 +789,8 @@ extension RKRTC.RKWSClient {
   @objc func setCameraTorchOn(_ isOn: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func setAudioRouteSpeakerphone(_ speakerphone: Swift.Bool)
   @objc func enableAudio(_ enableAudio: Swift.Bool)
-  @objc func refuse(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func busy(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func refuse(_ channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func busy(_ channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func setPublishResolution(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32)
   @objc func dissolutionChannel(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func addRtcClientListener(_ listener: RKRTC.RKRtcClientListener)
