@@ -659,6 +659,7 @@ SWIFT_CLASS("_TtC5RKRTC15RKRTCAPIManager")
 @end
 
 enum RKStreamType : int32_t;
+enum SubsribeType : NSInteger;
 
 SWIFT_PROTOCOL("_TtP5RKRTC16RKRTCAPIProtocol_")
 @protocol RKRTCAPIProtocol <NSObject>
@@ -817,7 +818,19 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) RKRTCAPIMana
 ///
 /// \param onFailed 失败回调
 ///
-- (void)channelSubscribeWithChannelId:(NSString * _Nonnull)channelId userId:(NSString * _Nonnull)userId stram:(enum RKStreamType)stram onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)channelSubscribeWithChannelId:(NSString * _Nonnull)channelId userId:(NSString * _Nonnull)userId stram:(enum RKStreamType)stram mediaType:(enum SubsribeType)mediaType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+///  修改音视频订阅
+/// \param channelId 频道ID
+///
+/// \param userId 用户id
+///
+/// \param mediaType 将要切换的音视频类型
+///
+/// \param onSuccess 成功回调
+///
+/// \param onFailed 失败回调
+///
+- (void)switchSubscribeWithChannelId:(NSString * _Nonnull)channelId userId:(NSString * _Nonnull)userId mediaType:(enum SubsribeType)mediaType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 取消订阅
 /// \param channelId 频道ID
 ///
@@ -833,13 +846,13 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) RKRTCAPIMana
 ///
 /// \param userId 成员ID列表
 ///
-/// \param isHighStram 是否大流 默认小流
+/// \param isHighStream 是否大流 默认小流
 ///
 /// \param onSuccess 成功回调
 ///
 /// \param onFailed 失败回调
 ///
-- (void)channelSwitchStreamWithChannelId:(NSString * _Nonnull)channelId userId:(NSString * _Nonnull)userId isHighStram:(BOOL)isHighStram onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)channelSwitchStreamWithChannelId:(NSString * _Nonnull)channelId userId:(NSString * _Nonnull)userId isHighStream:(BOOL)isHighStream onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 更新流媒体信息
 /// \param channelId 频道ID
 ///
@@ -1062,13 +1075,14 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, copy) NSString * _Nonnull toke
 /// 获取频道参数
 - (void)channelGetExtraParamsWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 订阅频道
-- (void)channelSubscribeWithChannelId:(NSString * _Nonnull)channelId userId:(NSString * _Nonnull)userId stram:(enum RKStreamType)stram onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)channelSubscribeWithChannelId:(NSString * _Nonnull)channelId userId:(NSString * _Nonnull)userId stram:(enum RKStreamType)stram mediaType:(enum SubsribeType)mediaType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 交换answer
 - (void)channelSubscribeAnswerWithChannelId:(NSString * _Nonnull)channelId sdpAnswer:(NSString * _Nonnull)sdpAnswer userId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)switchSubscribeWithChannelId:(NSString * _Nonnull)channelId userId:(NSString * _Nonnull)userId mediaType:(enum SubsribeType)mediaType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 取消订阅
 - (void)channelUnsubscribeWithChannelId:(NSString * _Nonnull)channelId userIdList:(NSArray<NSString *> * _Nonnull)userIdList onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 大小流切换
-- (void)channelSwitchStreamWithChannelId:(NSString * _Nonnull)channelId userId:(NSString * _Nonnull)userId isHighStram:(BOOL)isHighStram onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)channelSwitchStreamWithChannelId:(NSString * _Nonnull)channelId userId:(NSString * _Nonnull)userId isHighStream:(BOOL)isHighStream onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 更新流媒体信息
 - (void)channelUpdateMediaDeviceInfoWithChannelId:(NSString * _Nonnull)channelId mediaDeviceInfo:(NSString * _Nonnull)mediaDeviceInfo onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 获取当前频道内成员
@@ -1177,10 +1191,14 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 - (void)kickWithUserIds:(NSArray<NSString *> * _Nonnull)userIds onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 订阅视频流
 - (void)subscribeWithUserId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 订阅视频流带媒体选择
+- (void)subscribeWithUserId:(NSString * _Nonnull)userId mediaType:(enum SubsribeType)mediaType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 订阅媒体类型切换
+- (void)swicthSubscribeTypeWithUserId:(NSString * _Nonnull)userId mediaType:(enum SubsribeType)mediaType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 取消订阅视频流
 - (void)unSubscribeWithUserList:(NSArray<NSString *> * _Nonnull)userList onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 用户大小流切换
-- (void)switchStreamWithUserId:(NSString * _Nonnull)userId isHighStram:(BOOL)isHighStram onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)switchStreamWithUserId:(NSString * _Nonnull)userId isHighStream:(BOOL)isHighStream onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 获取本地视频View
 - (UIView * _Nullable)getLocalVideoView:(enum RKScaleType)scaleType SWIFT_WARN_UNUSED_RESULT;
 /// 获取远端用户视频View
@@ -1226,10 +1244,14 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 - (void)kickWithUserIds:(NSArray<NSString *> * _Nonnull)userIds onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 订阅视频流
 - (void)subscribeWithUserId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 订阅视频流带媒体选择
+- (void)subscribeWithUserId:(NSString * _Nonnull)userId mediaType:(enum SubsribeType)mediaType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 订阅媒体类型切换
+- (void)swicthSubscribeTypeWithUserId:(NSString * _Nonnull)userId mediaType:(enum SubsribeType)mediaType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 取消订阅视频流
 - (void)unSubscribeWithUserList:(NSArray<NSString *> * _Nonnull)userList onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 用户大小流切换
-- (void)switchStreamWithUserId:(NSString * _Nonnull)userId isHighStram:(BOOL)isHighStram onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)switchStreamWithUserId:(NSString * _Nonnull)userId isHighStream:(BOOL)isHighStream onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 获取本地视频View
 - (UIView * _Nullable)getLocalVideoView:(enum RKScaleType)scaleType SWIFT_WARN_UNUSED_RESULT;
 /// 获取远端用户视频View
@@ -1302,6 +1324,22 @@ typedef SWIFT_ENUM(NSInteger, RKRTCCode, open) {
   RKRTCCodeCHANNEL_MEMBERS_IS_FULL = 10016,
 /// 用户列表为空
   RKRTCCodeUSER_LIST_IS_EMPTY = 10017,
+/// 当前APPID 会议人数达到上限
+  RKRTCCodeUSER_ALREADY_FULL = 10028,
+/// 发送消息体为空
+  RKRTCCodeSEND_MESSAGE_IS_NULL = 10029,
+/// token 为空
+  RKRTCCodeTOKEN_IS_NULL = 20001,
+/// token 非法
+  RKRTCCodeTOKEN_IS_INVALID = 2002,
+/// token 不是来自于服务端
+  RKRTCCodeTOKEN_IS_NOT_FORM_SERVER = 20003,
+/// appid 为null
+  RKRTCCodeAPP_ID_IS_NULL = 20004,
+/// token 被销毁
+  RKRTCCodeTOKEN_IS_EXPIRE = 20005,
+/// appi 不存在
+  RKRTCCodeAPPID_IS_NOT_EXIST = 20006,
 };
 
 /// RTCClient state
@@ -1557,6 +1595,8 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 /// \param token 用户token
 ///
 - (void)loginWith:(NSString * _Nonnull)appId apiServer:(NSString * _Nonnull)apiServer userId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 登出
+- (void)logout;
 /// 更新token
 /// <ul>
 ///   <li>
@@ -1706,6 +1746,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 - (void)uploadLogOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 登录
 - (void)loginWith:(NSString * _Nonnull)appId apiServer:(NSString * _Nonnull)apiServer userId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)logout;
 /// 刷新token
 - (void)updateToken:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)enableCamera:(BOOL)enableCamera;
@@ -1746,6 +1787,13 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 - (void)dispose;
 @end
 
+
+typedef SWIFT_ENUM(NSInteger, SubsribeType, open) {
+  SubsribeTypeBoth = 0,
+  SubsribeTypeAudio = 1,
+  SubsribeTypeVideo = 2,
+  SubsribeTypeNone = 3,
+};
 
 
 #if __has_attribute(external_source_symbol)

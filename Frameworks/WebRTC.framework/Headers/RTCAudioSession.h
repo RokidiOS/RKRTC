@@ -203,7 +203,6 @@ RTC_OBJC_EXPORT
  */
 @property(nonatomic) BOOL ignoresPreferredAttributeConfigurationErrors;
 
-+ (void)outputs;
 /** Default constructor. */
 + (instancetype)sharedInstance;
 - (instancetype)init NS_UNAVAILABLE;
