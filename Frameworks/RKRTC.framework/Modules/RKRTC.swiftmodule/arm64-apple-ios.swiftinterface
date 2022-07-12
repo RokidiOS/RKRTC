@@ -531,6 +531,12 @@ public typealias RKOnFailed = (_ error: Foundation.NSError?) -> Swift.Void
   @objc required override dynamic public init()
   @objc deinit
 }
+@objc @_inheritsConvenienceInitializers public class RKRTCConfigManager : ObjectiveC.NSObject {
+  public static var shared: RKRTC.RKRTCConfigManager
+  public func resetUserAuthInfo()
+  @objc override dynamic public init()
+  @objc deinit
+}
 @objc @_inheritsConvenienceInitializers @objcMembers public class RKChannelUserInfoList : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
   @objc public var userId: Swift.String
   @objc public var mediaDeviceInfo: RKRTC.RKMediaDeviceInfo?
@@ -650,6 +656,7 @@ extension RKRTC.RKWebRTC : RKRTC.RKWebRTCInterface {
   @objc final public func dispose()
 }
 @_hasMissingDesignatedInitializers public class TokenCacheManager {
+  public static func clearTokenCache()
   @objc deinit
 }
 @_hasMissingDesignatedInitializers public class RKBaseResponse {

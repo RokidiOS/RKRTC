@@ -1342,6 +1342,12 @@ typedef SWIFT_ENUM(NSInteger, RKRTCCode, open) {
   RKRTCCodeAPPID_IS_NOT_EXIST = 20006,
 };
 
+
+SWIFT_CLASS("_TtC5RKRTC18RKRTCConfigManager")
+@interface RKRTCConfigManager : NSObject
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
 /// RTCClient state
 typedef SWIFT_ENUM(int32_t, RKRTCConnectionState, open) {
   RKRTCConnectionStateNew = 0,
