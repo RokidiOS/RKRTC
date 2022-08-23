@@ -244,6 +244,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC19RKAVQualityListener_")
 - (void)onRemoteAudioStatus:(NSString * _Nonnull)userId audioLevel:(double)audioLevel totalAudioEnergy:(double)totalAudioEnergy totalSamplesDuration:(double)totalSamplesDuration packetsLost:(int32_t)packetsLost;
 - (void)onRemoteVideoStatus:(NSString * _Nonnull)userId rid:(NSString * _Nullable)rid width:(int32_t)width height:(int32_t)height fps:(int32_t)fps bitrate:(int32_t)bitrate packetsLost:(int32_t)packetsLost;
 - (void)onAudioStatusWithAudioLevel:(double)audioLevel totalAudioEnergy:(double)totalAudioEnergy totalSamplesDuration:(double)totalSamplesDuration;
+- (void)onAudiobBitrate:(NSString * _Nonnull)userId bitrate:(int32_t)bitrate;
 - (void)onVideoRecordStatusWithWidth:(int32_t)width height:(int32_t)height fps:(int32_t)fps;
 - (void)onVideoPublishStatusWithRid:(NSString * _Nullable)rid width:(int32_t)width height:(int32_t)height fps:(int32_t)fps bitrate:(int32_t)bitrate qualityLimitationReason:(NSString * _Nullable)qualityLimitationReason;
 - (void)onVideoStreamUnstableWithUserId:(NSString * _Nonnull)userId lossRate:(float)lossRate;
@@ -410,6 +411,10 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKChannelEventHandler_")
 /// \param message 消息体 
 ///
 - (void)onChannelMessageReceived:(NSString * _Nonnull)message fromUserId:(NSString * _Nonnull)fromUserId;
+/// 外部自定义消息
+/// \param message 消息体 
+///
+- (void)onChannelThirdMessageReceived:(NSString * _Nonnull)message fromUserId:(NSString * _Nonnull)fromUserId;
 /// 远端用户音频上传状态变更
 /// \param userId 用户UserId 
 ///
@@ -566,6 +571,7 @@ SWIFT_CLASS("_TtC5RKRTC13RKMediaDevice")
 @interface RKMediaDevice : NSObject
 @property (nonatomic) AVCaptureDevicePosition position;
 @property (nonatomic, readonly) BOOL isLightOn;
+@property (nonatomic, readonly, strong) RKMediaDeviceInfo * _Nonnull mediaDeviceInfo;
 - (void)startCapture;
 - (void)stopCapture;
 - (void)switchCamera;
@@ -1126,6 +1132,7 @@ SWIFT_CLASS("_TtC5RKRTC12RKRTCChannel")
 /// 成员视频
 @property (nonatomic, copy) NSDictionary<NSString *, UIView *> * _Nonnull videoViews;
 @property (nonatomic) BOOL autoSubscribe;
+@property (nonatomic) BOOL enableSimulcast;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -1137,31 +1144,9 @@ SWIFT_CLASS("_TtC5RKRTC12RKRTCChannel")
 @end
 
 
+
 @interface RKRTCChannel (SWIFT_EXTENSION(RKRTC))
 - (void)stopWithChannelId:(NSString * _Nonnull)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
-@end
-
-@class RTCPeerConnection;
-@class RTCMediaStream;
-@class RTCRtpReceiver;
-@class RTCDataChannel;
-
-@interface RKRTCChannel (SWIFT_EXTENSION(RKRTC)) <RTCPeerConnectionDelegate>
-- (void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeSignalingState:(RTCSignalingState)stateChanged;
-- (void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didAddStream:(RTCMediaStream * _Nonnull)stream;
-- (void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didRemoveStream:(RTCMediaStream * _Nonnull)stream;
-- (void)peerConnectionShouldNegotiate:(RTCPeerConnection * _Nonnull)peerConnection;
-- (void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeIceConnectionState:(RTCIceConnectionState)newState;
-- (void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeIceGatheringState:(RTCIceGatheringState)newState;
-- (void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didGenerateIceCandidate:(RTCIceCandidate * _Nonnull)candidate;
-- (void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didRemoveReceiver:(RTCRtpReceiver * _Nonnull)rtpReceiver;
-- (void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didRemoveIceCandidates:(NSArray<RTCIceCandidate *> * _Nonnull)candidates;
-- (void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeStandardizedIceConnectionState:(RTCIceConnectionState)newState;
-- (void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeLocalCandidate:(RTCIceCandidate * _Nonnull)local remoteCandidate:(RTCIceCandidate * _Nonnull)remote lastReceivedMs:(int32_t)lastDataReceivedMs changeReason:(NSString * _Nonnull)reason;
-- (void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didOpenDataChannel:(RTCDataChannel * _Nonnull)dataChannel;
-- (void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didChangeConnectionState:(RTCPeerConnectionState)newState;
-/// 当有远端视频流过来的时候，就会触发
-- (void)peerConnection:(RTCPeerConnection * _Nonnull)peerConnection didAddReceiver:(RTCRtpReceiver * _Nonnull)rtpReceiver streams:(NSArray<RTCMediaStream *> * _Nonnull)mediaStreams;
 @end
 
 enum RKScaleType : int32_t;
@@ -1204,7 +1189,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 /// 获取远端用户视频View
 - (void)getRemoteVideoViewWithUserId:(NSString * _Nonnull)userId scaleType:(enum RKScaleType)scaleType compeletBlock:(SWIFT_NOESCAPE void (^ _Nonnull)(UIView * _Nullable))compeletBlock;
 /// 截图保存
-- (void)takeSnapshotWithUserId:(NSString * _Nonnull)userId filePath:(NSString * _Nonnull)filePath onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)takeSnapshotWithUserId:(NSString * _Nonnull)userId filePath:(NSString * _Nonnull)filePath renderView:(UIView * _Nullable)renderView onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 是否上传本地音频
 - (void)publishLocalAudioStream:(BOOL)publish;
 /// 是否上传本地视频
@@ -1218,11 +1203,11 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 /// 获取拓展参数
 - (void)getExtraParamsOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 发送频道消息给指定用户，userIdList 传空发给频道内所有用户，包括自己
-- (void)sendChannelMsgWithMsg:(NSString * _Nonnull)msg userIdList:(NSArray<NSString *> * _Nullable)userIdList;
+- (void)sendChannelMsgWithMsg:(NSString * _Nonnull)msg userIdList:(NSArray<NSString *> * _Nullable)userIdList onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 开启屏幕共享
-- (void)startScreenShareWithWidth:(int32_t)width height:(int32_t)height fps:(int32_t)fps;
+- (void)startScreenShareWithWidth:(int32_t)width height:(int32_t)height fps:(int32_t)fps onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 结束屏幕共享
-- (void)stopScreenShare;
+- (void)stopScreenShareOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 获取当前频道用户列表
 - (NSArray<RKChannelUserInfo *> * _Nonnull)getChannelUserList SWIFT_WARN_UNUSED_RESULT;
 /// 查询房间成员并订阅
@@ -1240,7 +1225,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 - (void)leave:(NSString * _Nullable)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 邀请用户加入频道
 - (void)inviteWithUserIds:(NSArray<NSString *> * _Nonnull)userIds onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
-/// 把用户提出频道
+/// 把用户踢出频道
 - (void)kickWithUserIds:(NSArray<NSString *> * _Nonnull)userIds onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 订阅视频流
 - (void)subscribeWithUserId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
@@ -1256,7 +1241,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 - (UIView * _Nullable)getLocalVideoView:(enum RKScaleType)scaleType SWIFT_WARN_UNUSED_RESULT;
 /// 获取远端用户视频View
 - (void)getRemoteVideoViewWithUserId:(NSString * _Nonnull)userId scaleType:(enum RKScaleType)scaleType compeletBlock:(SWIFT_NOESCAPE void (^ _Nonnull)(UIView * _Nullable))compeletBlock;
-- (void)takeSnapshotWithUserId:(NSString * _Nonnull)userId filePath:(NSString * _Nonnull)filePath onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)takeSnapshotWithUserId:(NSString * _Nonnull)userId filePath:(NSString * _Nonnull)filePath renderView:(UIView * _Nullable)renderView onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 是否上传本地音频
 - (void)publishLocalAudioStream:(BOOL)publish;
 /// 是否上传本地视频
@@ -1269,11 +1254,11 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 /// 获取拓展参数
 - (void)getExtraParamsOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 指定用户发送频道消息
-- (void)sendChannelMsgWithMsg:(NSString * _Nonnull)msg userIdList:(NSArray<NSString *> * _Nullable)userIdList;
+- (void)sendChannelMsgWithMsg:(NSString * _Nonnull)msg userIdList:(NSArray<NSString *> * _Nullable)userIdList onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 开启屏幕共享
-- (void)startScreenShareWithWidth:(int32_t)width height:(int32_t)height fps:(int32_t)fps;
+- (void)startScreenShareWithWidth:(int32_t)width height:(int32_t)height fps:(int32_t)fps onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 结束屏幕共享
-- (void)stopScreenShare;
+- (void)stopScreenShareOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 获取当前频道用户列表
 - (NSArray<RKChannelUserInfo *> * _Nonnull)getChannelUserList SWIFT_WARN_UNUSED_RESULT;
 /// 查询房间成员并订阅
@@ -1336,7 +1321,7 @@ typedef SWIFT_ENUM(NSInteger, RKRTCCode, open) {
   RKRTCCodeTOKEN_IS_NOT_FORM_SERVER = 20003,
 /// appid 为null
   RKRTCCodeAPP_ID_IS_NULL = 20004,
-/// token 被销毁
+/// token 被销毁 此code会自动刷新，其余均会自动刷新token
   RKRTCCodeTOKEN_IS_EXPIRE = 20005,
 /// appi 不存在
   RKRTCCodeAPPID_IS_NOT_EXIST = 20006,
@@ -1345,6 +1330,11 @@ typedef SWIFT_ENUM(NSInteger, RKRTCCode, open) {
 
 SWIFT_CLASS("_TtC5RKRTC18RKRTCConfigManager")
 @interface RKRTCConfigManager : NSObject
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) RKRTCConfigManager * _Nonnull shared;)
++ (RKRTCConfigManager * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
++ (void)setShared:(RKRTCConfigManager * _Nonnull)value;
+@property (nonatomic, readonly, copy) NSString * _Nonnull pUserId;
+- (void)resetUserAuthInfo;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -1367,6 +1357,7 @@ SWIFT_CLASS("_TtC5RKRTC12RKRTCMessage")
 @property (nonatomic, copy) NSString * _Nullable messageId;
 @property (nonatomic) int64_t timestamp;
 @property (nonatomic, copy) NSString * _Nullable channelId;
+@property (nonatomic, copy) NSString * _Nullable userId;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
@@ -1610,9 +1601,10 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 ///   </li>
 ///   <li>
 ///     token 用户token
+///     userId
 ///   </li>
 /// </ul>
-- (void)updateToken:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed SWIFT_DEPRECATED_MSG("1.3.0 弃用");
+- (void)updateToken:(NSString * _Nonnull)token userId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 开/关 Camera采集
 - (void)enableCamera:(BOOL)enableCamera;
 /// 切换摄像头
@@ -1754,7 +1746,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 - (void)loginWith:(NSString * _Nonnull)appId apiServer:(NSString * _Nonnull)apiServer userId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)logout;
 /// 刷新token
-- (void)updateToken:(NSString * _Nonnull)token onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)updateToken:(NSString * _Nonnull)token userId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)enableCamera:(BOOL)enableCamera;
 - (void)switchCamera;
 - (void)setCameraTorchOn:(BOOL)isOn onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
