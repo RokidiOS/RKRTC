@@ -1,4 +1,11 @@
 framework module RKRTC {
-  header "RKRTC-Swift.h"
-  requires objc
+  umbrella header "RKRTC-umbrella.h"
+
+  export *
+  module * { export * }
+}
+
+module RKRTC.Swift {
+    header "RKRTC-Swift.h"
+    requires objc
 }
