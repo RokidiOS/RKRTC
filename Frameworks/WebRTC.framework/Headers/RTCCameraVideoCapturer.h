@@ -51,6 +51,8 @@ NS_EXTENSION_UNAVAILABLE_IOS("Camera not available in app extensions.")
 // Stops the capture session asynchronously.
 - (void)stopCapture;
 
+- (void)capturebuff:(void (^) (CVImageBufferRef buffer)) completionHandle;
+
 @end
 
 NS_ASSUME_NONNULL_END

@@ -416,6 +416,10 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKChannelEventHandler_")
 /// \param message 消息体 
 ///
 - (void)onChannelThirdMessageReceived:(NSString * _Nonnull)message fromUserId:(NSString * _Nonnull)fromUserId;
+/// 有人重新进入了会议
+/// \param userId 入会userId 
+///
+- (void)rejoinChannel:(NSString * _Nonnull)userId;
 /// 远端用户音频上传状态变更
 /// \param userId 用户UserId 
 ///
@@ -499,6 +503,7 @@ typedef SWIFT_ENUM(int32_t, RKChannelOperationType, open) {
   RKChannelOperationTypeCALL_CANCEL = 7,
 /// 结束会议
   RKChannelOperationTypeEND = 8,
+  RKChannelOperationTypeREJOIN = 9,
 };
 
 
@@ -570,7 +575,7 @@ SWIFT_CLASS("_TtC5RKRTC15RKJoinedChannel")
 
 SWIFT_CLASS("_TtC5RKRTC13RKMediaDevice")
 @interface RKMediaDevice : NSObject
-@property (nonatomic) AVCaptureDevicePosition position;
+@property (nonatomic) enum AVCaptureDevicePosition position;
 @property (nonatomic, readonly) BOOL isLightOn;
 @property (nonatomic, readonly, strong) RKMediaDeviceInfo * _Nonnull mediaDeviceInfo;
 - (void)startCapture;
@@ -1146,10 +1151,10 @@ SWIFT_CLASS("_TtC5RKRTC12RKRTCChannel")
 
 
 
-
 @interface RKRTCChannel (SWIFT_EXTENSION(RKRTC)) <RTCVideoViewDelegate>
 - (void)videoView:(id <RTCVideoRenderer> _Nonnull)videoView didChangeVideoSize:(CGSize)size;
 @end
+
 
 
 
@@ -1514,7 +1519,6 @@ SWIFT_PROTOCOL("_TtP5RKRTC12RKWSProtocol_")
 SWIFT_CLASS("_TtC5RKRTC10RKWSClient")
 @interface RKWSClient : NSObject <RKWSProtocol>
 @property (nonatomic, weak) id <RKWSDelegate> _Nullable delegate;
-@property (nonatomic) BOOL autoReconnect;
 - (nonnull instancetype)initWithWsServer:(NSURL * _Nonnull)wsServer OBJC_DESIGNATED_INITIALIZER;
 - (void)sendWithData:(NSData * _Nonnull)data;
 - (void)sendWithDataString:(NSString * _Nonnull)dataString;
@@ -1559,6 +1563,9 @@ typedef SWIFT_ENUM(NSInteger, RKWSState, open) {
 
 SWIFT_CLASS("_TtC5RKRTC8RKWebRTC")
 @interface RKWebRTC : NSObject
+SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) RKWebRTC * _Nonnull shared;)
++ (RKWebRTC * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
++ (void)setShared:(RKWebRTC * _Nonnull)value;
 @property (nonatomic, copy) void (^ _Nullable loginSuccessCallBack)(id _Nullable);
 @property (nonatomic, copy) void (^ _Nullable loginFailCallBack)(NSError * _Nullable);
 @property (nonatomic, copy) void (^ _Nullable refreshSuccessCallBack)(id _Nullable);
