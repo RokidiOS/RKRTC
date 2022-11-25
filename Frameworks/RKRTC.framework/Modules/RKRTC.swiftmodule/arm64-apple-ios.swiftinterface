@@ -1,6 +1,7 @@
 // swift-interface-format-version: 1.0
-// swift-compiler-version: Apple Swift version 5.6.1 (swiftlang-5.6.0.323.66 clang-1316.0.20.12)
+// swift-compiler-version: Apple Swift version 5.7.1 (swiftlang-5.7.1.135.3 clang-1400.0.29.51)
 // swift-module-flags: -target arm64-apple-ios10.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -module-name RKRTC
+// swift-module-flags-ignorable: -enable-bare-slash-regex
 import AVFoundation
 import AWSCore
 import AWSS3
@@ -22,6 +23,7 @@ import Swift
 import UIKit
 import WebRTC
 import _Concurrency
+import _StringProcessing
 @objc public protocol RKAudioConsumer : ObjectiveC.NSObjectProtocol {
   @objc func consumeByteBufferFrame(inputId: Swift.String, sampleRateHz: Swift.Int32, channels: Swift.Int32, data: Swift.Int8, playDelayMS: Swift.Int32, recDelayMS: Swift.Int32, clockDrift: Swift.Int32)
   @objc func startCustomAudio()
@@ -196,7 +198,7 @@ import _Concurrency
 }
 extension RKRTC.RKMediaDevice : WebRTC.RTCVideoRenderer {
   @objc dynamic public func renderFrame(_ frame: WebRTC.RTCVideoFrame?)
-  @objc dynamic public func setSize(_ size: CoreGraphics.CGSize)
+  @objc dynamic public func setSize(_ size: CoreFoundation.CGSize)
 }
 extension RKRTC.RKMediaDevice : RKRTC.RKVideoFrameConsumer {
   @objc dynamic public func consumeByteBufferFrame(buffer: CoreVideo.CVPixelBuffer, format: RKRTC.RKVideoFormat, width: Swift.Int32, height: Swift.Int32, rotation: RKRTC.RKVideoRotation, timestamp: Swift.Int64)
@@ -245,7 +247,10 @@ extension RKRTC.RKMediaDevice : WebRTC.RTCAudioSessionDelegate {
   }
 }
 public typealias RKCompletion = (_ response: RKRTC.RKBaseResponse) -> Swift.Void
-public let RKRTCAPI: RKRTC.RKRTCProvider
+public func RKRTCModifyRKRTCAPI(disabledTrustEvaluatorHosts hosts: [Swift.String])
+public var RKRTCAPI: RKRTC.RKRTCProvider {
+  get
+}
 @_inheritsConvenienceInitializers public class RKRTCProvider : Moya.MoyaProvider<RKRTC.RKRTCAPIs> {
   public var refreshTokenBlock: ((@escaping (() -> Swift.Void)) -> Swift.Void)?
   public var refreshTokenFailBlock: ((RKRTC.RKRTCCode) -> Swift.Void)?
@@ -396,7 +401,7 @@ extension RKRTC.RKRTCChannel {
   @objc dynamic public func stop(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
 }
 extension RKRTC.RKRTCChannel : WebRTC.RTCVideoViewDelegate {
-  @objc dynamic public func videoView(_ videoView: WebRTC.RTCVideoRenderer, didChangeVideoSize size: CoreGraphics.CGSize)
+  @objc dynamic public func videoView(_ videoView: WebRTC.RTCVideoRenderer, didChangeVideoSize size: CoreFoundation.CGSize)
 }
 extension RKRTC.RKRTCChannel : RKRTC.RKRTCChannelInterface {
   @objc dynamic public func join(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32 = 2000, maxDelay: Swift.Int32 = 0, inviteUserId: Swift.String? = nil, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)

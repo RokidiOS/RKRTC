@@ -6,6 +6,6 @@ framework module RKRTC {
 }
 
 module RKRTC.Swift {
-    header "RKRTC-Swift.h"
-    requires objc
+  header "RKRTC-Swift.h"
+  requires objc
 }
