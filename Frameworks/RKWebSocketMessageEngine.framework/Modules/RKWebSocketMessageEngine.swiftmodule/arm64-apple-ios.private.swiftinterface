@@ -1,0 +1,48 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.7.1 (swiftlang-5.7.1.135.3 clang-1400.0.29.51)
+// swift-module-flags: -target arm64-apple-ios10.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -module-name RKWebSocketMessageEngine
+// swift-module-flags-ignorable: -enable-bare-slash-regex
+import Foundation
+import RKILogger
+import RKMessageSDK
+import RKSocket
+@_exported import RKWebSocketMessageEngine
+import Swift
+import _Concurrency
+import _StringProcessing
+public enum RKWSState {
+  case idle
+  case connected
+  case disconnect
+  case closed
+  case reconnectSuggested
+  public static func == (a: RKWebSocketMessageEngine.RKWSState, b: RKWebSocketMessageEngine.RKWSState) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+@objc @_inheritsConvenienceInitializers public class RKWebSocketMessageEngine : ObjectiveC.NSObject, RKMessageSDK.IMMessageEngineProtocol {
+  public static let shared: RKWebSocketMessageEngine.RKWebSocketMessageEngine
+  public func buildConfig(_ config: [Swift.String : Swift.String])
+  public func login(_ userInfo: [Swift.String : Swift.String], callBack: @escaping (RKMessageSDK.IMCallBack) -> Swift.Void)
+  public func reconectedAction(_ callBack: @escaping ((Swift.Bool) -> Swift.Void))
+  public func logOut(_ callBack: @escaping (RKMessageSDK.IMCallBack) -> Swift.Void)
+  public func sendMessage(_ msg: RKMessageSDK.RKIMMessage, callBack: @escaping (RKMessageSDK.IMCallBack) -> Swift.Void)
+  public func receivedMessage(_ msgCallBack: @escaping (Swift.String) -> Swift.Void)
+  public func reconnect()
+  @objc override dynamic public init()
+  @objc deinit
+}
+extension RKWebSocketMessageEngine.RKWebSocketMessageEngine : RKSocket.RKSocketDelegate {
+  public func rkwebSocket(_ webSocket: RKSocket.RKSocket, didFailWithError error: Swift.Error)
+  public func rkwebSocketDidOpen(_ webSocket: RKSocket.RKSocket)
+  public func rkwebSocket(_ webSocket: RKSocket.RKSocket, didCloseWithCode code: Swift.Int, reason: Swift.String?, wasClean: Swift.Bool)
+  public func rkwebSocket(_ webSocket: RKSocket.RKSocket, didReceiveMessage message: Any)
+  public func rkwebSocket(_ webSocket: RKSocket.RKSocket, didReceiveMessageWith data: Foundation.Data)
+  public func rkwebSocket(_ webSocket: RKSocket.RKSocket, didReceiveMessageWith string: Swift.String)
+  public func rkwebSocket(_ webSocket: RKSocket.RKSocket, didReceivePingWith data: Foundation.Data?)
+  public func rkwebSocket(_ webSocket: RKSocket.RKSocket, didReceivePong pongData: Foundation.Data?)
+}
+extension RKWebSocketMessageEngine.RKWSState : Swift.Equatable {}
+extension RKWebSocketMessageEngine.RKWSState : Swift.Hashable {}

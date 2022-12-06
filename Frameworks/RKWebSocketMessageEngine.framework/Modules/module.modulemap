@@ -1,0 +1,11 @@
+framework module RKWebSocketMessageEngine {
+  umbrella header "RKWebSocketMessageEngine-umbrella.h"
+
+  export *
+  module * { export * }
+}
+
+module RKWebSocketMessageEngine.Swift {
+  header "RKWebSocketMessageEngine-Swift.h"
+  requires objc
+}

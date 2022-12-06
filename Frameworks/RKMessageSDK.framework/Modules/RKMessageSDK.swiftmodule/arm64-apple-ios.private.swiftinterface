@@ -1,0 +1,72 @@
+// swift-interface-format-version: 1.0
+// swift-compiler-version: Apple Swift version 5.7.1 (swiftlang-5.7.1.135.3 clang-1400.0.29.51)
+// swift-module-flags: -target arm64-apple-ios10.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -module-name RKMessageSDK
+// swift-module-flags-ignorable: -enable-bare-slash-regex
+import Foundation
+import RKILogger
+@_exported import RKMessageSDK
+import Swift
+import _Concurrency
+import _StringProcessing
+public enum IMCallBack {
+  case success
+  case fail(Swift.Int, Swift.String)
+}
+public typealias IMCallBackBlock = (RKMessageSDK.IMCallBack) -> Swift.Void
+public protocol IMMessageEngineProtocol {
+  func buildConfig(_ config: [Swift.String : Swift.String])
+  func login(_ userInfo: [Swift.String : Swift.String], callBack: @escaping RKMessageSDK.IMCallBackBlock)
+  func logOut(_ callBack: @escaping RKMessageSDK.IMCallBackBlock)
+  func sendMessage(_ msg: RKMessageSDK.RKIMMessage, callBack: @escaping RKMessageSDK.IMCallBackBlock)
+  func receivedMessage(_ msgCallBack: @escaping (Swift.String) -> Swift.Void)
+  func reconectedAction(_ callBack: @escaping ((Swift.Bool) -> Swift.Void))
+  func reconnect()
+}
+public protocol RKMessageListennerProtocol {
+  func receivedMessage(_ msg: RKMessageSDK.RKIMMessage)
+  func receivedMessageString(_ msgString: Swift.String)
+}
+public enum ConnectingState {
+  case connected
+  case disConnected
+  public static func == (a: RKMessageSDK.ConnectingState, b: RKMessageSDK.ConnectingState) -> Swift.Bool
+  public func hash(into hasher: inout Swift.Hasher)
+  public var hashValue: Swift.Int {
+    get
+  }
+}
+public protocol RKIMManagerProtocol {
+  func connectingChange(state: RKMessageSDK.ConnectingState)
+}
+@_hasMissingDesignatedInitializers public class RKIMMannager {
+  public static let shared: RKMessageSDK.RKIMMannager
+  public var delegate: RKMessageSDK.RKIMManagerProtocol?
+  public func configEngine(_ engine: RKMessageSDK.IMMessageEngineProtocol)
+  public func addMsgListenner(listenner: RKMessageSDK.RKMessageListennerProtocol)
+  public func login(_ userInfo: [Swift.String : Swift.String], callBack: @escaping (RKMessageSDK.IMCallBack) -> Swift.Void)
+  public func logOut(_ callBack: @escaping (RKMessageSDK.IMCallBack) -> Swift.Void)
+  public func sendMessage(_ msg: RKMessageSDK.RKIMMessage, callBack: @escaping (RKMessageSDK.IMCallBack) -> Swift.Void)
+  public func listenConnected()
+  public func reconnect()
+  @objc deinit
+}
+public enum RKSendType : Swift.String {
+  case group
+  case single
+  public init?(rawValue: Swift.String)
+  public typealias RawValue = Swift.String
+  public var rawValue: Swift.String {
+    get
+  }
+}
+@objc @_inheritsConvenienceInitializers public class RKIMMessage : ObjectiveC.NSObject, Swift.Codable {
+  @objc override dynamic public init()
+  @objc deinit
+  public func encode(to encoder: Swift.Encoder) throws
+  required public init(from decoder: Swift.Decoder) throws
+}
+extension RKMessageSDK.ConnectingState : Swift.Equatable {}
+extension RKMessageSDK.ConnectingState : Swift.Hashable {}
+extension RKMessageSDK.RKSendType : Swift.Equatable {}
+extension RKMessageSDK.RKSendType : Swift.Hashable {}
+extension RKMessageSDK.RKSendType : Swift.RawRepresentable {}
