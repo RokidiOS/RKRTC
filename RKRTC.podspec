@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'RKRTC'
-  s.version          = '4.0.0'
+  s.version          = '3.2.2'
   s.summary          = 'iOS Rokid RTC SDK .'
   s.description      = <<-DESC
   Rokid iOS rtc SDK .
@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.homepage         = 'https://github.com/RokidiOS/RKRTCSDK'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'amos' => 'xiaodong.chen@rokid.com' }
-  s.source = { :git => "https://github.com/RokidiOS/RKRTC.git", :branch => "4.0.0-global_swift5.7.1" }
+  s.source = { :git => "https://github.com/RokidiOS/RKRTC.git", :branch => "3.2.2_swift5.7.1" }
 
   s.ios.deployment_target = '10.0'
   
@@ -22,15 +22,13 @@ Pod::Spec.new do |s|
     'ENABLE_BITCODE' => 'NO'
   }
   
-  s.dependency 'RKILogger'
+  s.dependency 'RKILogger', '0.2.7'
   
   s.dependency 'RKIUtils'
   
   s.dependency 'RKIHandyJSON'
-  
-  s.dependency 'TXLiteAVSDK_TRTC', '~> 10.3.12271'
 
   s.dependency 'Moya'
 
-  s.dependency 'Starscream'
+  s.dependency 'RKSocket'
   end
