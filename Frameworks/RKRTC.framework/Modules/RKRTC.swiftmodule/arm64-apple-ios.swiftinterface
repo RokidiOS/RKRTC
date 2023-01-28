@@ -111,6 +111,7 @@ import _StringProcessing
   @objc optional func onUserPublishVidepSizeChanged(_ userId: Swift.String, width: Swift.Int32, height: Swift.Int32)
   @objc optional func onVideoPublishStatus(_ userId: Swift.String, rid: Swift.String?, width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32, bitrate: Swift.Int32, qualityLimitationReason: Swift.String?)
   @objc optional func onError(_ errorCode: Swift.Int)
+  @objc func onInviteFail(channelId: Swift.String, userId: Swift.String, inviteUserId: Swift.String)
 }
 @objc @_inheritsConvenienceInitializers @objcMembers public class RKChannelInfo : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
   @objc public var maxResolution: Swift.String
@@ -733,6 +734,7 @@ public enum RKWSMessageType : Swift.String, RKIHandyJSON.HandyJSONEnum {
   case CALL_CANCEL
   case END
   case REJOIN
+  case INVITE_FAIL
   public typealias RawValue = Swift.String
   public var rawValue: RKRTC.RKChannelOperationType.RawValue {
     get

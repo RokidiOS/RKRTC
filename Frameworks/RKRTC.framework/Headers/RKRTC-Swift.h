@@ -508,6 +508,15 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKChannelEventHandler_")
 /// \param errorCode 错误码 
 ///
 - (void)onError:(NSInteger)errorCode;
+@required
+/// 收到邀请失败
+/// \param channelId 用户频道id
+///
+/// \param userId 用户UserId
+///
+/// \param inviteUserId 邀请人UserId
+///
+- (void)onInviteFailWithChannelId:(NSString * _Nonnull)channelId userId:(NSString * _Nonnull)userId inviteUserId:(NSString * _Nonnull)inviteUserId;
 @end
 
 
@@ -542,7 +551,10 @@ typedef SWIFT_ENUM(int32_t, RKChannelOperationType, open) {
   RKChannelOperationTypeCALL_CANCEL = 7,
 /// 结束会议
   RKChannelOperationTypeEND = 8,
+/// 重新加入会议
   RKChannelOperationTypeREJOIN = 9,
+/// 邀请失败
+  RKChannelOperationTypeINVITE_FAIL = 10,
 };
 
 
