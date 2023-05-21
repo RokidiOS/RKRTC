@@ -1,6 +1,6 @@
 // swift-interface-format-version: 1.0
 // swift-compiler-version: Apple Swift version 5.7.1 (swiftlang-5.7.1.135.3 clang-1400.0.29.51)
-// swift-module-flags: -target arm64-apple-ios10.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -Onone -module-name RKRTC
+// swift-module-flags: -target arm64-apple-ios10.0 -enable-objc-interop -enable-library-evolution -swift-version 5 -enforce-exclusivity=checked -O -module-name RKRTC
 // swift-module-flags-ignorable: -enable-bare-slash-regex
 import AVFoundation
 import AWSCore
@@ -17,78 +17,12 @@ import Moya
 import RKIHandyJSON
 import RKILogger
 import RKIUtils
-@_exported import RKRTC
 import RKSocket
 import Swift
 import UIKit
 import WebRTC
 import _Concurrency
 import _StringProcessing
-@objc public protocol RKAudioConsumer : ObjectiveC.NSObjectProtocol {
-  @objc func consumeByteBufferFrame(inputId: Swift.String, sampleRateHz: Swift.Int32, channels: Swift.Int32, data: Swift.Int8, playDelayMS: Swift.Int32, recDelayMS: Swift.Int32, clockDrift: Swift.Int32)
-  @objc func startCustomAudio()
-  @objc func customAudio()
-  @objc func endCustomAudio()
-}
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKAudioFrame : ObjectiveC.NSObject {
-  @objc override dynamic public init()
-  @objc deinit
-}
-@objc public protocol RKAudioSource : ObjectiveC.NSObjectProtocol {
-  @objc func onCreate(consumer: RKRTC.RKAudioConsumer)
-  @objc func onStart()
-  @objc func onStop()
-}
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKAVAnalysisModel : ObjectiveC.NSObject {
-  @objc public var userId: Swift.String
-  @objc public var packetsLost: Swift.Int32
-  @objc public var rid: Swift.String
-  @objc public var width: Swift.Int32
-  @objc public var height: Swift.Int32
-  @objc public var fps: Swift.Int32
-  @objc public var bitrate: Swift.Int32
-  @objc public var lossRate: Swift.Float
-  @objc public var qualityLimitationReason: Swift.String
-  @objc public var audioLevel: Swift.Double
-  @objc public var totalAudioEnergy: Swift.Double
-  @objc public var totalSamplesDuration: Swift.Double
-  @objc override dynamic public init()
-  @objc deinit
-}
-@objc public protocol RKAVQualityListener : ObjectiveC.NSObjectProtocol {
-  @objc func onRemoteAudioStatus(_ userId: Swift.String, audioLevel: Swift.Double, totalAudioEnergy: Swift.Double, totalSamplesDuration: Swift.Double, packetsLost: Swift.Int32)
-  @objc func onRemoteVideoStatus(_ userId: Swift.String, rid: Swift.String?, width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32, bitrate: Swift.Int32, packetsLost: Swift.Int32)
-  @objc func onAudioStatus(audioLevel: Swift.Double, totalAudioEnergy: Swift.Double, totalSamplesDuration: Swift.Double)
-  @objc func onAudiobBitrate(_ userId: Swift.String, bitrate: Swift.Int32, networkQualityState: RKRTC.RKNetworkQualityState)
-  @objc func onVideoRecordStatus(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32)
-  @objc func onVideoPublishStatus(rid: Swift.String?, width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32, bitrate: Swift.Int32, qualityLimitationReason: Swift.String?, networkQualityState: RKRTC.RKNetworkQualityState)
-  @objc func onVideoStreamUnstable(userId: Swift.String, lossRate: Swift.Float)
-}
-@objc public protocol RKCallEventHandler : ObjectiveC.NSObjectProtocol {
-  @objc func onReceiveCall(channelId: Swift.String, channelActionMsg: RKRTC.RKChannelActionMsg)
-  @objc func onCallCanceled(channelId: Swift.String, userId: Swift.String)
-}
-@objc public protocol RKCaptureInterceptor : ObjectiveC.NSObjectProtocol {
-  @objc func onIntercept(_ buffer: RKRTC.RKVideoFrame)
-}
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKChannelActionMsg : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
-  @objc public var operateType: RKRTC.RKChannelOperationType
-  @objc public var activeOperateUser: Swift.String?
-  @objc public var passiveOperateUserList: [Swift.String]?
-  @objc public var mediaDeviceInfo: RKRTC.RKMediaDeviceInfo?
-  @objc public var password: Swift.String?
-  @objc public var channelName: Swift.String?
-  @objc public var channelSubject: Swift.String?
-  @objc public var extraParams: Swift.String?
-  @objc public var remark: Swift.String?
-  public var maxMembers: Swift.Int?
-  @objc public var refuseState: Swift.String?
-  @objc public var inviteUserId: Swift.String?
-  @objc public var maxResolution: Swift.String?
-  public func mapping(mapper: RKIHandyJSON.HelpingMapper)
-  @objc required override dynamic public init()
-  @objc deinit
-}
 @objc public protocol RKChannelEventHandler : ObjectiveC.NSObjectProtocol {
   @objc func onUserJoined(user: RKRTC.RKChannelUserInfo, inviteUserId: Swift.String?)
   @objc func onUserLeft(userId: Swift.String)
@@ -113,6 +47,228 @@ import _StringProcessing
   @objc optional func onError(_ errorCode: Swift.Int)
   @objc func onInviteFail(channelId: Swift.String, userId: Swift.String, inviteUserId: Swift.String)
 }
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKAudioFrame : ObjectiveC.NSObject {
+  @objc override dynamic public init()
+  @objc deinit
+}
+@objc public protocol RKVideoFrameConsumer : ObjectiveC.NSObjectProtocol {
+  @objc func consumeByteBufferFrame(buffer: CoreVideo.CVPixelBuffer, format: RKRTC.RKVideoFormat, width: Swift.Int32, height: Swift.Int32, rotation: RKRTC.RKVideoRotation, timestamp: Swift.Int64)
+  @objc func consumeByteArrayFrame(data: [Swift.UInt8], format: RKRTC.RKVideoFormat, width: Swift.Int32, height: Swift.Int32, rotation: RKRTC.RKVideoRotation, timestamp: Swift.Int64)
+}
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKChannelUserInfo : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
+  @objc public var userId: Swift.String
+  @objc public var mediaDeviceInfo: RKRTC.RKMediaDeviceInfo?
+  @objc required override dynamic public init()
+  @objc deinit
+}
+extension RKRTC.RKWebRTC : RKRTC.RKWebRTCInterface {
+  @objc final public func uploadLog(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func login(with appId: Swift.String, apiServer: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func logout()
+  @objc final public func updateToken(_ token: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func enableCamera(_ enableCamera: Swift.Bool)
+  @objc final public func switchCamera()
+  @objc final public func setCameraTorchOn(_ isOn: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func setAudioRouteSpeakerphone(_ speakerphone: Swift.Bool)
+  @objc final public func enableAudio(_ enableAudio: Swift.Bool)
+  @objc final public func refuse(_ channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func busy(_ channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func setPublishResolution(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32 = 24)
+  @objc final public func dissolutionChannel(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func addRtcClientListener(_ listener: RKRTC.RKRtcClientListener)
+  @objc final public func removeRtcClientListener(_ listener: RKRTC.RKRtcClientListener)
+  @objc final public func addCallEventHandler(_ listener: RKRTC.RKCallEventHandler)
+  @objc final public func removeCallEventHandler(_ listener: RKRTC.RKCallEventHandler)
+  @objc final public func addCaptureInterceptor(_ listener: RKRTC.RKCaptureInterceptor)
+  @objc final public func removeCaptureInterceptor(_ listener: RKRTC.RKCaptureInterceptor)
+  @objc final public func setVideoSource(_ source: RKRTC.RKVideoSource)
+  @objc final public func stopVideoSource()
+  @objc final public func setAudioSource(_ source: RKRTC.RKAudioSource)
+  @objc final public func receiveAudio(userId: Swift.String, isEnabled: Swift.Bool)
+  @objc final public func receiveVideo(userId: Swift.String, isEnabled: Swift.Bool)
+  @objc final public func adjustPlaybackVolume(_ volume: Swift.Double)
+  @objc final public func findJoinedChannel(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func focus(xPercent: Swift.Float, yPercent: Swift.Float)
+  @objc final public func selectAudio(device: RKRTC.RKAudioDevice)
+  @objc final public func getAllAudioDevice() -> [Any]
+  @objc final public func leave(channelId: Swift.String)
+  @objc final public func startServerRecording(_ channelId: Swift.String, resolution: Swift.String, subStream: RKRTC.RKStreamType, bucket: Swift.String, fileName: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func stopServerRecording(_ channelId: Swift.String, save: Swift.Bool = true)
+  @objc final public func getServerRecordingFiles(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func setVideoPublishBitrate(_ bitrateMapping16to9: Swift.Array<Swift.Array<Swift.Int32>>, bitrateMapping4to3: Swift.Array<Swift.Array<Swift.Int32>>)
+  @objc final public func dispose()
+}
+@_hasMissingDesignatedInitializers public class TokenCacheManager {
+  public static func clearTokenCache()
+  @objc deinit
+}
+@objc public enum RKRTCStreamConnectState : Swift.Int32 {
+  case disconnected
+  case connecting
+  case connected
+  public init?(rawValue: Swift.Int32)
+  public typealias RawValue = Swift.Int32
+  public var rawValue: Swift.Int32 {
+    get
+  }
+}
+@objc public protocol RKRTCChannelInterface : ObjectiveC.NSObjectProtocol {
+  @objc var channelId: Swift.String { get }
+  @objc var channelTitle: Swift.String { get }
+  @objc var channelUserList: [RKRTC.RKChannelUserInfo] { get }
+  @objc var autoSubscribe: Swift.Bool { get set }
+  @objc func join(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32, maxDelay: Swift.Int32, inviteUserId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func join(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32, maxDelay: Swift.Int32, inviteUserId: Swift.String?, timeout: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func leave(_ channelId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func invite(userIds: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func kick(userIds: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func subscribe(userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func subscribe(userId: Swift.String, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func getUserStreamState(userId: Swift.String) -> RKRTC.RKRTCStreamConnectState
+  @objc func swicthSubscribeType(userId: Swift.String, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func unSubscribe(userList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func switchStream(userId: Swift.String, isHighStream: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func getLocalVideoView(_ scaleType: RKRTC.RKScaleType) -> UIKit.UIView?
+  @objc func getRemoteVideoView(userId: Swift.String, scaleType: RKRTC.RKScaleType, compeletBlock: (UIKit.UIView?) -> Swift.Void)
+  @objc func takeSnapshot(userId: Swift.String, filePath: Swift.String, renderView: UIKit.UIView?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func publishLocalAudioStream(_ publish: Swift.Bool)
+  @objc func publishLocalVideoStream(_ publish: Swift.Bool)
+  @objc func setChannelEventHandler(_ channelEventHandler: RKRTC.RKChannelEventHandler?)
+  @objc func setQualityHandler(_ qualityListener: RKRTC.RKAVQualityEventHandler?)
+  @objc func setExtraParams(_ extras: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func getExtraParams(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func sendChannelMsg(msg: Swift.String, userIdList: [Swift.String]?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func startScreenShare(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func stopScreenShare(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func getChannelUserList() -> [RKRTC.RKChannelUserInfo]
+  @objc func getSpaceUserList(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func configVideoQuality(maxPublishBitrate: Swift.Int32, maxDelay: Swift.Int32)
+}
+@objc public protocol RKRtcClientListener : ObjectiveC.NSObjectProtocol {
+  @objc func onRtcClientConnected()
+  @objc func onRtcClientClosed()
+  @objc func onRtcClientError(_ errorCode: Foundation.NSError?)
+  @objc func onRtcClientKicked()
+  @objc func onJoinedChannelList(_ channelList: [RKRTC.RKJoinedChannel]?)
+}
+@objc @_inheritsConvenienceInitializers @objcMembers final public class RKWebRTC : ObjectiveC.NSObject {
+  @objc public static var shared: RKRTC.RKWebRTC
+  @objc final public var loginSuccessCallBack: RKRTC.RKOnSuccess?
+  @objc final public var loginFailCallBack: RKRTC.RKOnFailed?
+  @objc final public var refreshSuccessCallBack: RKRTC.RKOnSuccess?
+  @objc final public var refreshFailCallBack: RKRTC.RKOnFailed?
+  @objc final public var autoSubscribe: Swift.Bool
+  @objc final public var rtcDevice: RKRTC.RKMediaDevice
+  @objc final public var rtcChannel: RKRTC.RKRTCChannel
+  @objc override dynamic public init()
+  @objc deinit
+}
+public typealias RKOnSuccess = (_ data: Any?) -> Swift.Void
+public typealias RKOnFailed = (_ error: Foundation.NSError?) -> Swift.Void
+@objc public protocol RKRTCAPIProtocol : ObjectiveC.NSObjectProtocol {
+  @objc static var shared: RKRTC.RKRTCAPIManager! { get }
+  @objc func generatorToken(sdkId: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func refreshToken(_ refreshToken: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelCreate(userIdList: [Swift.String]?, password: Swift.String?, thirdChannelId: Swift.String?, channelName: Swift.String?, channelSubject: Swift.String?, extraParams: Swift.String?, remark: Swift.String?, maxMembers: Swift.Int32, maxResolution: Swift.String, bitrate: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelJoin(channelId: Swift.String, password: Swift.String?, sdpOffer: Swift.String, mediaDeviceInfo: Swift.String, bitrate: Swift.Int32, maxDelay: Swift.Int32, inviteUserId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelInvite(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelCancelInvite(channelId: Swift.String, cancelUserIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelLeave(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelEnd(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelKick(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelRefuse(channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelBusy(channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelSetExtraParams(channelId: Swift.String, extraParams: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelGetExtraParams(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelSubscribe(channelId: Swift.String, userId: Swift.String, stram: RKRTC.RKStreamType, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func switchSubscribe(channelId: Swift.String, userId: Swift.String, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelUnsubscribe(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelSwitchStream(channelId: Swift.String, userId: Swift.String, isHighStream: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelUpdateMediaDeviceInfo(channelId: Swift.String, mediaDeviceInfo: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelGetSpaceUserList(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func getChannelList(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelReconnection(channelId: Swift.String, sdpOffer: Swift.String?, subscribeUserIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func sendChannelForwardMessage(channelId: Swift.String, userIdList: [Swift.String]?, sendMessageStr: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @available(*, deprecated, message: "1.3.0 弃用")
+  @objc func startScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @available(*, deprecated, message: "1.3.0 弃用")
+  @objc func stopScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func getScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func reportShareInfo(channelId: Swift.String, promoterUserId: Swift.String, shareInfo: Swift.String, shareType: RKRTC.RKIShareType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func queryReportShareInfo(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func queryChannelInfo(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func addChannelGraffiti(channelId: Swift.String, promoterUserId: Swift.String?, graffitiJsonList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func queryChannelGraffiti(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func clearMeetingGraffiti(channelId: Swift.String, promoterUserId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelModifyStreamConfigure(channelId: Swift.String, bitrate: Swift.Int32, minDelay: Swift.Int32, maxDelay: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func channelIceCandidate(channelId: Swift.String, passiveSubscribeUserId: Swift.String, iceCandidateList: [RKRTC.RKIceCandidate], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func recordingStart(channelId: Swift.String, resolution: Swift.String, subStream: RKRTC.RKStreamType, bucket: Swift.String, fileName: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func recordingEnd(channelId: Swift.String, save: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func getRecordingList(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+}
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKRTCAPIManager : ObjectiveC.NSObject {
+  @objc override dynamic public init()
+  @objc deinit
+}
+@_hasMissingDesignatedInitializers public class RKBaseResponse {
+  public var success: Swift.Bool
+  public var errorCode: Swift.Int {
+    get
+    set
+  }
+  public var errorMsg: Swift.String
+  public var data: Any?
+  @objc deinit
+}
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKChannelUserInfoList : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
+  @objc public var userId: Swift.String
+  @objc public var mediaDeviceInfo: RKRTC.RKMediaDeviceInfo?
+  public func mapping(mapper: RKIHandyJSON.HelpingMapper)
+  @objc required override dynamic public init()
+  @objc deinit
+}
+extension RKRTC.RKRTCAPIManager : RKRTC.RKRTCAPIProtocol {
+  @objc public static let shared: RKRTC.RKRTCAPIManager
+  @objc public static var token: Swift.String
+  @objc dynamic public func getInitConfig(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func generatorToken(sdkId: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func refreshToken(_ refreshToken: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelCreate(userIdList: [Swift.String]?, password: Swift.String?, thirdChannelId: Swift.String?, channelName: Swift.String?, channelSubject: Swift.String?, extraParams: Swift.String?, remark: Swift.String?, maxMembers: Swift.Int32, maxResolution: Swift.String, bitrate: Swift.Int32 = 2000, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelJoin(channelId: Swift.String, password: Swift.String?, sdpOffer: Swift.String, mediaDeviceInfo: Swift.String, bitrate: Swift.Int32 = 2000, maxDelay: Swift.Int32 = 0, inviteUserId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelInvite(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelCancelInvite(channelId: Swift.String, cancelUserIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelLeave(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelEnd(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelKick(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelRefuse(channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelBusy(channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelSetExtraParams(channelId: Swift.String, extraParams: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelGetExtraParams(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelSubscribe(channelId: Swift.String, userId: Swift.String, stram: RKRTC.RKStreamType = .low, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelSubscribeAnswer(channelId: Swift.String, sdpAnswer: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func switchSubscribe(channelId: Swift.String, userId: Swift.String, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelUnsubscribe(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelSwitchStream(channelId: Swift.String, userId: Swift.String, isHighStream: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelUpdateMediaDeviceInfo(channelId: Swift.String, mediaDeviceInfo: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelGetSpaceUserList(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func getChannelList(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelReconnection(channelId: Swift.String, sdpOffer: Swift.String?, subscribeUserIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func sendChannelForwardMessage(channelId: Swift.String, userIdList: [Swift.String]?, sendMessageStr: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func startScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func stopScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func getScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func reportShareInfo(channelId: Swift.String, promoterUserId: Swift.String, shareInfo: Swift.String, shareType: RKRTC.RKIShareType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func queryReportShareInfo(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func queryChannelInfo(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func addChannelGraffiti(channelId: Swift.String, promoterUserId: Swift.String?, graffitiJsonList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func queryChannelGraffiti(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func clearMeetingGraffiti(channelId: Swift.String, promoterUserId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelModifyStreamConfigure(channelId: Swift.String, bitrate: Swift.Int32 = 2000, minDelay: Swift.Int32 = 10, maxDelay: Swift.Int32 = 0, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func channelIceCandidate(channelId: Swift.String, passiveSubscribeUserId: Swift.String, iceCandidateList: [RKRTC.RKIceCandidate], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func recordingStart(channelId: Swift.String, resolution: Swift.String, subStream: RKRTC.RKStreamType, bucket: Swift.String, fileName: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func recordingEnd(channelId: Swift.String, save: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func getRecordingList(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+}
 @objc @_inheritsConvenienceInitializers @objcMembers public class RKChannelInfo : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
   @objc public var maxResolution: Swift.String
   @objc public var channelOwner: Swift.String
@@ -126,114 +282,6 @@ import _StringProcessing
   public var shareInfo: [Any?]?
   public var graffitiInfoList: [Any?]?
   @objc required override dynamic public init()
-  @objc deinit
-}
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKChannelUserInfo : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
-  @objc public var userId: Swift.String
-  @objc public var mediaDeviceInfo: RKRTC.RKMediaDeviceInfo?
-  @objc required override dynamic public init()
-  @objc deinit
-}
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKChannelUserInfoList : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
-  @objc public var userId: Swift.String
-  @objc public var mediaDeviceInfo: RKRTC.RKMediaDeviceInfo?
-  public func mapping(mapper: RKIHandyJSON.HelpingMapper)
-  @objc required override dynamic public init()
-  @objc deinit
-}
-@_inheritsConvenienceInitializers @objcMembers @objc public class RKI420Buffer : ObjectiveC.NSObject {
-  @objc public var chromaWidth: Swift.Int32
-  @objc public var chromaHeight: Swift.Int32
-  @objc public var dataY: Swift.UnsafePointer<Swift.UInt8>?
-  @objc public var dataU: Swift.UnsafePointer<Swift.UInt8>?
-  @objc public var dataV: Swift.UnsafePointer<Swift.UInt8>?
-  @objc public var strideY: Swift.Int32
-  @objc public var strideU: Swift.Int32
-  @objc public var strideV: Swift.Int32
-  @objc override dynamic public init()
-  @objc deinit
-}
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKIceCandidate : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
-  @objc public var candidate: Swift.String
-  @objc public var sdpMLineIndex: Swift.Int32
-  @objc public var sdpMid: Swift.String
-  @objc public var passiveSubscribeUserId: Swift.String
-  @objc public var rtcIceCandidate: WebRTC.RTCIceCandidate {
-    @objc get
-  }
-  @objc required override dynamic public init()
-  @objc deinit
-}
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKJoinedChannel : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
-  @objc public var channelId: Swift.String
-  @objc public var password: Swift.String
-  @objc public var channelName: Swift.String?
-  @objc public var channelSubject: Swift.String?
-  public var maxMembers: Swift.Int32?
-  @objc public var maxResolution: Swift.String?
-  @objc public var extraParams: Swift.String?
-  @objc public var remark: Swift.String?
-  @objc public var membersList: [RKRTC.RKChannelUserInfo]?
-  @objc required override dynamic public init()
-  @objc deinit
-}
-@_hasMissingDesignatedInitializers public class RKMediaDataManager {
-  public static let shared: RKRTC.RKMediaDataManager
-  public var defaultMediaType: RKRTC.SubsribeType
-  public var defaultStreamType: RKRTC.RKStreamType
-  public func clear()
-  @objc deinit
-}
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKMediaDevice : ObjectiveC.NSObject {
-  @objc public var position: AVFoundation.AVCaptureDevice.Position
-  @objc public var isLightOn: Swift.Bool {
-    @objc get
-  }
-  @objc final public let mediaDeviceInfo: RKRTC.RKMediaDeviceInfo
-  @objc deinit
-  @objc public func startCapture()
-  @objc public func stopCapture(_ c: @escaping () -> Swift.Void)
-  @objc public func switchCamera()
-  @objc public func lightTurn(_ turnOn: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc override dynamic public init()
-}
-extension RKRTC.RKMediaDevice : WebRTC.RTCVideoRenderer {
-  @objc dynamic public func renderFrame(_ frame: WebRTC.RTCVideoFrame?)
-  @objc dynamic public func setSize(_ size: CoreFoundation.CGSize)
-}
-extension RKRTC.RKMediaDevice : RKRTC.RKVideoFrameConsumer {
-  @objc dynamic public func consumeByteBufferFrame(buffer: CoreVideo.CVPixelBuffer, format: RKRTC.RKVideoFormat, width: Swift.Int32, height: Swift.Int32, rotation: RKRTC.RKVideoRotation, timestamp: Swift.Int64)
-  @objc dynamic public func consumeByteArrayFrame(data: [Swift.UInt8], format: RKRTC.RKVideoFormat, width: Swift.Int32, height: Swift.Int32, rotation: RKRTC.RKVideoRotation, timestamp: Swift.Int64)
-}
-extension RKRTC.RKMediaDevice : RKRTC.RKAudioConsumer {
-  @objc dynamic public func startCustomAudio()
-  @objc dynamic public func customAudio()
-  @objc dynamic public func endCustomAudio()
-  @objc dynamic public func consumeByteBufferFrame(inputId: Swift.String, sampleRateHz: Swift.Int32, channels: Swift.Int32, data: Swift.Int8, playDelayMS: Swift.Int32, recDelayMS: Swift.Int32, clockDrift: Swift.Int32)
-}
-extension RKRTC.RKMediaDevice : WebRTC.RTCAudioSessionDelegate {
-  @objc dynamic public func audioSession(_ audioSession: WebRTC.RTCAudioSession, didCapture audioFrame: WebRTC.RTCAudioFrame) -> WebRTC.RTCAudioFrame
-}
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKMediaDeviceInfo : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
-  @objc public var audio: Swift.Bool
-  @objc public var video: Swift.Bool
-  @objc public var netQuality: Swift.Int32
-  @objc public var volumeEnergy: Swift.Int32
-  @objc public var videoWidth: Swift.Int32
-  @objc public var videoHeight: Swift.Int32
-  @objc public var screenShare: Swift.Bool
-  @objc public var portraitDegree: Swift.Int
-  @objc required override dynamic public init()
-  @objc deinit
-}
-@_hasMissingDesignatedInitializers public class RKBaseResponse {
-  public var success: Swift.Bool
-  public var errorCode: Swift.Int {
-    get
-    set
-  }
-  public var errorMsg: Swift.String
-  public var data: Any?
   @objc deinit
 }
 @objc public enum SubsribeType : Swift.Int {
@@ -324,68 +372,50 @@ extension RKRTC.RKRTCAPIs : Moya.TargetType {
     get
   }
 }
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKRecordingFile : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
-  @objc public var channelId: Swift.String?
-  @objc public var url: Swift.String?
-  @objc public var startTime: Swift.Double
-  @objc public var endTime: Swift.Double
-  @objc public var resolution: Swift.String?
-  public var subStream: RKRTC.RKStreamType?
-  @objc public var recordingState: Swift.String?
-  @objc public var message: Swift.String?
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKJoinedChannel : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
+  @objc public var channelId: Swift.String
+  @objc public var password: Swift.String
+  @objc public var channelName: Swift.String?
+  @objc public var channelSubject: Swift.String?
+  public var maxMembers: Swift.Int32?
+  @objc public var maxResolution: Swift.String?
+  @objc public var extraParams: Swift.String?
+  @objc public var remark: Swift.String?
+  @objc public var membersList: [RKRTC.RKChannelUserInfo]?
   @objc required override dynamic public init()
   @objc deinit
 }
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKRecordingStateModel : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
-  public var recordingState: RKRTC.RKRecordingState?
-  @objc public var url: Swift.String?
-  @objc public var startTime: Swift.String?
-  @objc public var endTime: Swift.String?
-  @objc public var message: Swift.String?
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKIceCandidate : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
+  @objc public var candidate: Swift.String
+  @objc public var sdpMLineIndex: Swift.Int32
+  @objc public var sdpMid: Swift.String
+  @objc public var passiveSubscribeUserId: Swift.String
+  @objc public var rtcIceCandidate: WebRTC.RTCIceCandidate {
+    @objc get
+  }
   @objc required override dynamic public init()
   @objc deinit
 }
-extension RKRTC.RKRTCAPIManager : RKRTC.RKRTCAPIProtocol {
-  @objc public static let shared: RKRTC.RKRTCAPIManager
-  @objc public static var token: Swift.String
-  @objc dynamic public func getInitConfig(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func generatorToken(sdkId: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func refreshToken(_ refreshToken: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelCreate(userIdList: [Swift.String]?, password: Swift.String?, thirdChannelId: Swift.String?, channelName: Swift.String?, channelSubject: Swift.String?, extraParams: Swift.String?, remark: Swift.String?, maxMembers: Swift.Int32, maxResolution: Swift.String, bitrate: Swift.Int32 = 2000, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelJoin(channelId: Swift.String, password: Swift.String?, sdpOffer: Swift.String, mediaDeviceInfo: Swift.String, bitrate: Swift.Int32 = 2000, maxDelay: Swift.Int32 = 0, inviteUserId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelInvite(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelCancelInvite(channelId: Swift.String, cancelUserIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelLeave(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelEnd(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelKick(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelRefuse(channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelBusy(channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelSetExtraParams(channelId: Swift.String, extraParams: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelGetExtraParams(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelSubscribe(channelId: Swift.String, userId: Swift.String, stram: RKRTC.RKStreamType = .low, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelSubscribeAnswer(channelId: Swift.String, sdpAnswer: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func switchSubscribe(channelId: Swift.String, userId: Swift.String, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelUnsubscribe(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelSwitchStream(channelId: Swift.String, userId: Swift.String, isHighStream: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelUpdateMediaDeviceInfo(channelId: Swift.String, mediaDeviceInfo: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelGetSpaceUserList(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func getChannelList(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelReconnection(channelId: Swift.String, sdpOffer: Swift.String?, subscribeUserIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func sendChannelForwardMessage(channelId: Swift.String, userIdList: [Swift.String]?, sendMessageStr: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func startScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func stopScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func getScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func reportShareInfo(channelId: Swift.String, promoterUserId: Swift.String, shareInfo: Swift.String, shareType: RKRTC.RKIShareType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func queryReportShareInfo(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func queryChannelInfo(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func addChannelGraffiti(channelId: Swift.String, promoterUserId: Swift.String?, graffitiJsonList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func queryChannelGraffiti(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func clearMeetingGraffiti(channelId: Swift.String, promoterUserId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelModifyStreamConfigure(channelId: Swift.String, bitrate: Swift.Int32 = 2000, minDelay: Swift.Int32 = 10, maxDelay: Swift.Int32 = 0, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func channelIceCandidate(channelId: Swift.String, passiveSubscribeUserId: Swift.String, iceCandidateList: [RKRTC.RKIceCandidate], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func recordingStart(channelId: Swift.String, resolution: Swift.String, subStream: RKRTC.RKStreamType, bucket: Swift.String, fileName: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func recordingEnd(channelId: Swift.String, save: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func getRecordingList(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+@objc public protocol RKVideoSource : ObjectiveC.NSObjectProtocol {
+  @objc func onCreate(_ consumer: RKRTC.RKVideoFrameConsumer)
+  @objc func onStart()
+  @objc func onStop()
+}
+@objc public protocol RKAVQualityEventHandler : ObjectiveC.NSObjectProtocol {
+  @objc func onRemoteAudioStatus(_ userId: Swift.String, audioLevel: Swift.Double, totalAudioEnergy: Swift.Double, totalSamplesDuration: Swift.Double, packetsLost: Swift.Int32)
+  @objc func onRemoteVideoStatus(_ userId: Swift.String, rid: Swift.String?, width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32, bitrate: Swift.Int32, packetsLost: Swift.Int32)
+  @objc func onAudioStatus(audioLevel: Swift.Double, totalAudioEnergy: Swift.Double, totalSamplesDuration: Swift.Double)
+  @objc func onAudiobBitrate(_ userId: Swift.String, bitrate: Swift.Int32, networkQualityState: RKRTC.RKNetworkQualityState)
+  @objc func onVideoRecordStatus(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32)
+  @objc func onVideoPublishStatus(rid: Swift.String?, width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32, bitrate: Swift.Int32, qualityLimitationReason: Swift.String?, networkQualityState: RKRTC.RKNetworkQualityState)
+  @objc func onVideoStreamUnstable(userId: Swift.String, lossRate: Swift.Float)
+  @objc func onUserNetworkQuality(userId: Swift.String, networkQualityState: RKRTC.RKNetworkQualityState)
+  @objc func onUserStreamConnectState(userId: Swift.String, streamConnectState: RKRTC.RKRTCStreamConnectState)
+}
+@objc public protocol RKAudioSource : ObjectiveC.NSObjectProtocol {
+  @objc func onCreate(consumer: RKRTC.RKAudioConsumer)
+  @objc func onStart()
+  @objc func onStop()
 }
 @objc @_inheritsConvenienceInitializers @objcMembers public class RKRTCChannel : ObjectiveC.NSObject {
   @objc public var channelId: Swift.String
@@ -404,70 +434,12 @@ extension RKRTC.RKRTCChannel {
 extension RKRTC.RKRTCChannel : WebRTC.RTCVideoViewDelegate {
   @objc dynamic public func videoView(_ videoView: WebRTC.RTCVideoRenderer, didChangeVideoSize size: CoreFoundation.CGSize)
 }
-extension RKRTC.RKRTCChannel : RKRTC.RKRTCChannelInterface {
-  @objc dynamic public func join(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32 = 2000, maxDelay: Swift.Int32 = 0, inviteUserId: Swift.String? = nil, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func realJoin(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32, maxDelay: Swift.Int32, inviteUserId: Swift.String? = nil, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func leave(_ channelId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func invite(userIds: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func kick(userIds: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func subscribe(userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func subscribe(userId: Swift.String, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func swicthSubscribeType(userId: Swift.String, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func unSubscribe(userList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func switchStream(userId: Swift.String, isHighStream: Swift.Bool = false, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func getLocalVideoView(_ scaleType: RKRTC.RKScaleType = .SCALE_ASPECT_FIT) -> UIKit.UIView?
-  @objc dynamic public func getRemoteVideoView(userId: Swift.String, scaleType: RKRTC.RKScaleType = .SCALE_ASPECT_FIT, compeletBlock: (UIKit.UIView?) -> Swift.Void)
-  @objc dynamic public func takeSnapshot(userId: Swift.String, filePath: Swift.String, renderView: UIKit.UIView?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func publishLocalAudioStream(_ publish: Swift.Bool)
-  @objc dynamic public func publishLocalVideoStream(_ publish: Swift.Bool)
-  @objc dynamic public func setChannelEventHandler(_ channelEventHandler: RKRTC.RKChannelEventHandler?)
-  @objc dynamic public func setQualityHandler(_ qualityListener: RKRTC.RKAVQualityListener?)
-  @objc dynamic public func setExtraParams(_ extras: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func getExtraParams(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func sendChannelMsg(msg: Swift.String, userIdList: [Swift.String]? = nil, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func startScreenShare(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func stopScreenShare(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func getChannelUserList() -> [RKRTC.RKChannelUserInfo]
-  @objc dynamic public func getSpaceUserList(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc dynamic public func configVideoQuality(maxPublishBitrate: Swift.Int32, maxDelay: Swift.Int32)
-  @objc dynamic public func publishDeviceDirectio()
-}
-@objc public protocol RKRTCChannelInterface : ObjectiveC.NSObjectProtocol {
-  @objc var channelId: Swift.String { get }
-  @objc var channelTitle: Swift.String { get }
-  @objc var channelUserList: [RKRTC.RKChannelUserInfo] { get }
-  @objc var autoSubscribe: Swift.Bool { get set }
-  @objc func join(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32, maxDelay: Swift.Int32, inviteUserId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func leave(_ channelId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func invite(userIds: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func kick(userIds: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func subscribe(userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func subscribe(userId: Swift.String, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func swicthSubscribeType(userId: Swift.String, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func unSubscribe(userList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func switchStream(userId: Swift.String, isHighStream: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func getLocalVideoView(_ scaleType: RKRTC.RKScaleType) -> UIKit.UIView?
-  @objc func getRemoteVideoView(userId: Swift.String, scaleType: RKRTC.RKScaleType, compeletBlock: (UIKit.UIView?) -> Swift.Void)
-  @objc func takeSnapshot(userId: Swift.String, filePath: Swift.String, renderView: UIKit.UIView?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func publishLocalAudioStream(_ publish: Swift.Bool)
-  @objc func publishLocalVideoStream(_ publish: Swift.Bool)
-  @objc func setChannelEventHandler(_ channelEventHandler: RKRTC.RKChannelEventHandler?)
-  @objc func setQualityHandler(_ qualityListener: RKRTC.RKAVQualityListener?)
-  @objc func setExtraParams(_ extras: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func getExtraParams(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func sendChannelMsg(msg: Swift.String, userIdList: [Swift.String]?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func startScreenShare(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func stopScreenShare(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func getChannelUserList() -> [RKRTC.RKChannelUserInfo]
-  @objc func getSpaceUserList(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func configVideoQuality(maxPublishBitrate: Swift.Int32, maxDelay: Swift.Int32)
-}
-@objc public protocol RKRtcClientListener : ObjectiveC.NSObjectProtocol {
-  @objc func onRtcClientConnected()
-  @objc func onRtcClientClosed()
-  @objc func onRtcClientError(_ errorCode: Foundation.NSError?)
-  @objc func onRtcClientKicked()
-  @objc func onJoinedChannelList(_ channelList: [RKRTC.RKJoinedChannel]?)
+@_hasMissingDesignatedInitializers public class RKMediaDataManager {
+  public static let shared: RKRTC.RKMediaDataManager
+  public var defaultMediaType: RKRTC.SubsribeType
+  public var defaultStreamType: RKRTC.RKStreamType
+  public func clear()
+  @objc deinit
 }
 @objc public enum RKRTCCode : Swift.Int, RKIHandyJSON.HandyJSONEnum {
   case OK = 0
@@ -504,27 +476,47 @@ extension RKRTC.RKRTCChannel : RKRTC.RKRTCChannelInterface {
     get
   }
 }
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKRTCConfigManager : ObjectiveC.NSObject {
-  @objc public static var shared: RKRTC.RKRTCConfigManager
-  @objc public var pUserId: Swift.String {
-    @objc get
-  }
-  @objc public func resetUserAuthInfo()
+extension RKRTC.RKRTCChannel : RKRTC.RKRTCChannelInterface {
+  @objc dynamic public func join(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32 = 2000, maxDelay: Swift.Int32 = 0, inviteUserId: Swift.String? = nil, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func join(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32 = 2000, maxDelay: Swift.Int32 = 0, inviteUserId: Swift.String? = nil, timeout: Swift.Int32 = 30, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func realJoin(channelId: Swift.String, audio: Swift.Bool, video: Swift.Bool, password: Swift.String?, bitrate: Swift.Int32, maxDelay: Swift.Int32, inviteUserId: Swift.String? = nil, timeout: Swift.Int32 = 30, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func leave(_ channelId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func invite(userIds: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func kick(userIds: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func subscribe(userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func subscribe(userId: Swift.String, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func getUserStreamState(userId: Swift.String) -> RKRTC.RKRTCStreamConnectState
+  @objc dynamic public func swicthSubscribeType(userId: Swift.String, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func unSubscribe(userList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func switchStream(userId: Swift.String, isHighStream: Swift.Bool = false, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func getLocalVideoView(_ scaleType: RKRTC.RKScaleType = .SCALE_ASPECT_FIT) -> UIKit.UIView?
+  @objc dynamic public func getRemoteVideoView(userId: Swift.String, scaleType: RKRTC.RKScaleType = .SCALE_ASPECT_FIT, compeletBlock: (UIKit.UIView?) -> Swift.Void)
+  @objc dynamic public func takeSnapshot(userId: Swift.String, filePath: Swift.String, renderView: UIKit.UIView?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func publishLocalAudioStream(_ publish: Swift.Bool)
+  @objc dynamic public func publishLocalVideoStream(_ publish: Swift.Bool)
+  @objc dynamic public func setChannelEventHandler(_ channelEventHandler: RKRTC.RKChannelEventHandler?)
+  @objc dynamic public func setQualityHandler(_ qualityListener: RKRTC.RKAVQualityEventHandler?)
+  @objc dynamic public func setExtraParams(_ extras: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func getExtraParams(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func sendChannelMsg(msg: Swift.String, userIdList: [Swift.String]? = nil, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func startScreenShare(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func stopScreenShare(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func getChannelUserList() -> [RKRTC.RKChannelUserInfo]
+  @objc dynamic public func getSpaceUserList(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc dynamic public func configVideoQuality(maxPublishBitrate: Swift.Int32, maxDelay: Swift.Int32)
+  @objc dynamic public func publishDeviceDirectio()
+}
+@_inheritsConvenienceInitializers @objcMembers @objc public class RKI420Buffer : ObjectiveC.NSObject {
+  @objc public var chromaWidth: Swift.Int32
+  @objc public var chromaHeight: Swift.Int32
+  @objc public var dataY: Swift.UnsafePointer<Swift.UInt8>?
+  @objc public var dataU: Swift.UnsafePointer<Swift.UInt8>?
+  @objc public var dataV: Swift.UnsafePointer<Swift.UInt8>?
+  @objc public var strideY: Swift.Int32
+  @objc public var strideU: Swift.Int32
+  @objc public var strideV: Swift.Int32
   @objc override dynamic public init()
   @objc deinit
-}
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKRTCMessage : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
-  public var messageType: RKRTC.RKWSMessageType?
-  @objc public var messageData: Any?
-  @objc public var messageId: Swift.String?
-  @objc public var timestamp: Swift.Int64
-  @objc public var channelId: Swift.String?
-  @objc public var userId: Swift.String?
-  @objc required override dynamic public init()
-  @objc deinit
-}
-extension UIKit.UIDevice {
-  @_Concurrency.MainActor(unsafe) public static func isIPhone11Series() -> Swift.Bool
 }
 @_inheritsConvenienceInitializers @objcMembers @objc public class RKVideoFrame : ObjectiveC.NSObject {
   @objc public var width: Swift.Int32
@@ -535,156 +527,76 @@ extension UIKit.UIDevice {
   @objc override dynamic public init()
   @objc deinit
 }
-@objc public protocol RKVideoFrameConsumer : ObjectiveC.NSObjectProtocol {
-  @objc func consumeByteBufferFrame(buffer: CoreVideo.CVPixelBuffer, format: RKRTC.RKVideoFormat, width: Swift.Int32, height: Swift.Int32, rotation: RKRTC.RKVideoRotation, timestamp: Swift.Int64)
-  @objc func consumeByteArrayFrame(data: [Swift.UInt8], format: RKRTC.RKVideoFormat, width: Swift.Int32, height: Swift.Int32, rotation: RKRTC.RKVideoRotation, timestamp: Swift.Int64)
-}
-@objc public protocol RKVideoSource : ObjectiveC.NSObjectProtocol {
-  @objc func onCreate(_ consumer: RKRTC.RKVideoFrameConsumer)
-  @objc func onStart()
-  @objc func onStop()
-}
-@objc @_inheritsConvenienceInitializers @objcMembers final public class RKWebRTC : ObjectiveC.NSObject {
-  @objc public static var shared: RKRTC.RKWebRTC
-  @objc final public var loginSuccessCallBack: RKRTC.RKOnSuccess?
-  @objc final public var loginFailCallBack: RKRTC.RKOnFailed?
-  @objc final public var refreshSuccessCallBack: RKRTC.RKOnSuccess?
-  @objc final public var refreshFailCallBack: RKRTC.RKOnFailed?
-  @objc final public var autoSubscribe: Swift.Bool
-  @objc final public var rtcDevice: RKRTC.RKMediaDevice
-  @objc final public var rtcChannel: RKRTC.RKRTCChannel
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKRTCConfigManager : ObjectiveC.NSObject {
+  @objc public static var shared: RKRTC.RKRTCConfigManager
+  @objc public var pUserId: Swift.String {
+    @objc get
+  }
+  @objc public func resetUserAuthInfo()
   @objc override dynamic public init()
   @objc deinit
 }
-extension RKRTC.RKWebRTC : RKRTC.RKWebRTCInterface {
-  @objc final public func uploadLog(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc final public func login(with appId: Swift.String, apiServer: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc final public func logout()
-  @objc final public func updateToken(_ token: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc final public func enableCamera(_ enableCamera: Swift.Bool)
-  @objc final public func switchCamera()
-  @objc final public func setCameraTorchOn(_ isOn: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc final public func setAudioRouteSpeakerphone(_ speakerphone: Swift.Bool)
-  @objc final public func enableAudio(_ enableAudio: Swift.Bool)
-  @objc final public func refuse(_ channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc final public func busy(_ channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc final public func setPublishResolution(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32 = 24)
-  @objc final public func dissolutionChannel(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc final public func addRtcClientListener(_ listener: RKRTC.RKRtcClientListener)
-  @objc final public func removeRtcClientListener(_ listener: RKRTC.RKRtcClientListener)
-  @objc final public func addCallEventHandler(_ listener: RKRTC.RKCallEventHandler)
-  @objc final public func removeCallEventHandler(_ listener: RKRTC.RKCallEventHandler)
-  @objc final public func addCaptureInterceptor(_ listener: RKRTC.RKCaptureInterceptor)
-  @objc final public func removeCaptureInterceptor(_ listener: RKRTC.RKCaptureInterceptor)
-  @objc final public func setVideoSource(_ source: RKRTC.RKVideoSource)
-  @objc final public func stopVideoSource()
-  @objc final public func setAudioSource(_ source: RKRTC.RKAudioSource)
-  @objc final public func receiveAudio(userId: Swift.String, isEnabled: Swift.Bool)
-  @objc final public func receiveVideo(userId: Swift.String, isEnabled: Swift.Bool)
-  @objc final public func adjustPlaybackVolume(_ volume: Swift.Double)
-  @objc final public func findJoinedChannel(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc final public func focus(xPercent: Swift.Float, yPercent: Swift.Float)
-  @objc final public func selectAudio(device: RKRTC.RKAudioDevice)
-  @objc final public func getAllAudioDevice() -> [Any]
-  @objc final public func leave(channelId: Swift.String)
-  @objc final public func startServerRecording(_ channelId: Swift.String, resolution: Swift.String, subStream: RKRTC.RKStreamType, bucket: Swift.String, fileName: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc final public func stopServerRecording(_ channelId: Swift.String, save: Swift.Bool = true)
-  @objc final public func getServerRecordingFiles(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc final public func setVideoPublishBitrate(_ bitrateMapping16to9: Swift.Array<Swift.Array<Swift.Int32>>, bitrateMapping4to3: Swift.Array<Swift.Array<Swift.Int32>>)
-  @objc final public func dispose()
-}
-@_hasMissingDesignatedInitializers public class TokenCacheManager {
-  public static func clearTokenCache()
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKRecordingFile : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
+  @objc public var channelId: Swift.String?
+  @objc public var url: Swift.String?
+  @objc public var startTime: Swift.Double
+  @objc public var endTime: Swift.Double
+  @objc public var resolution: Swift.String?
+  public var subStream: RKRTC.RKStreamType?
+  @objc public var recordingState: Swift.String?
+  @objc public var message: Swift.String?
+  @objc required override dynamic public init()
   @objc deinit
 }
-extension RKRTC.RKWebRTC : RKRTC.RKWSDelegate {
-  @objc final public func webSocketStateDidChange(state: RKRTC.RKWSState, error: Foundation.NSError?)
-  @objc final public func webSocketDidReceive(data: Foundation.Data?, message: RKRTC.RKRTCMessage)
-}
-public typealias RKOnSuccess = (_ data: Any?) -> Swift.Void
-public typealias RKOnFailed = (_ error: Foundation.NSError?) -> Swift.Void
-@objc public protocol RKRTCAPIProtocol : ObjectiveC.NSObjectProtocol {
-  @objc static var shared: RKRTC.RKRTCAPIManager! { get }
-  @objc func generatorToken(sdkId: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func refreshToken(_ refreshToken: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelCreate(userIdList: [Swift.String]?, password: Swift.String?, thirdChannelId: Swift.String?, channelName: Swift.String?, channelSubject: Swift.String?, extraParams: Swift.String?, remark: Swift.String?, maxMembers: Swift.Int32, maxResolution: Swift.String, bitrate: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelJoin(channelId: Swift.String, password: Swift.String?, sdpOffer: Swift.String, mediaDeviceInfo: Swift.String, bitrate: Swift.Int32, maxDelay: Swift.Int32, inviteUserId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelInvite(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelCancelInvite(channelId: Swift.String, cancelUserIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelLeave(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelEnd(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelKick(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelRefuse(channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelBusy(channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelSetExtraParams(channelId: Swift.String, extraParams: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelGetExtraParams(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelSubscribe(channelId: Swift.String, userId: Swift.String, stram: RKRTC.RKStreamType, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func switchSubscribe(channelId: Swift.String, userId: Swift.String, mediaType: RKRTC.SubsribeType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelUnsubscribe(channelId: Swift.String, userIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelSwitchStream(channelId: Swift.String, userId: Swift.String, isHighStream: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelUpdateMediaDeviceInfo(channelId: Swift.String, mediaDeviceInfo: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelGetSpaceUserList(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func getChannelList(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelReconnection(channelId: Swift.String, sdpOffer: Swift.String?, subscribeUserIdList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func sendChannelForwardMessage(channelId: Swift.String, userIdList: [Swift.String]?, sendMessageStr: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @available(*, deprecated, message: "1.3.0 弃用")
-  @objc func startScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @available(*, deprecated, message: "1.3.0 弃用")
-  @objc func stopScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func getScreenShare(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func reportShareInfo(channelId: Swift.String, promoterUserId: Swift.String, shareInfo: Swift.String, shareType: RKRTC.RKIShareType, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func queryReportShareInfo(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func queryChannelInfo(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func addChannelGraffiti(channelId: Swift.String, promoterUserId: Swift.String?, graffitiJsonList: [Swift.String], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func queryChannelGraffiti(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func clearMeetingGraffiti(channelId: Swift.String, promoterUserId: Swift.String?, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelModifyStreamConfigure(channelId: Swift.String, bitrate: Swift.Int32, minDelay: Swift.Int32, maxDelay: Swift.Int32, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func channelIceCandidate(channelId: Swift.String, passiveSubscribeUserId: Swift.String, iceCandidateList: [RKRTC.RKIceCandidate], onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func recordingStart(channelId: Swift.String, resolution: Swift.String, subStream: RKRTC.RKStreamType, bucket: Swift.String, fileName: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func recordingEnd(channelId: Swift.String, save: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func getRecordingList(channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-}
-@objc @_inheritsConvenienceInitializers @objcMembers public class RKRTCAPIManager : ObjectiveC.NSObject {
-  @objc override dynamic public init()
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKChannelActionMsg : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
+  @objc public var operateType: RKRTC.RKChannelOperationType
+  @objc public var activeOperateUser: Swift.String?
+  @objc public var passiveOperateUserList: [Swift.String]?
+  @objc public var mediaDeviceInfo: RKRTC.RKMediaDeviceInfo?
+  @objc public var password: Swift.String?
+  @objc public var channelName: Swift.String?
+  @objc public var channelSubject: Swift.String?
+  @objc public var extraParams: Swift.String?
+  @objc public var remark: Swift.String?
+  public var maxMembers: Swift.Int?
+  @objc public var refuseState: Swift.String?
+  @objc public var inviteUserId: Swift.String?
+  @objc public var maxResolution: Swift.String?
+  public func mapping(mapper: RKIHandyJSON.HelpingMapper)
+  @objc required override dynamic public init()
   @objc deinit
 }
-@objc public protocol RKWebRTCInterface : ObjectiveC.NSObjectProtocol {
-  @objc var autoSubscribe: Swift.Bool { get set }
-  @objc var rtcDevice: RKRTC.RKMediaDevice { get }
-  @objc var rtcChannel: RKRTC.RKRTCChannel { get }
-  @objc func login(with appId: Swift.String, apiServer: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func logout()
-  @objc func updateToken(_ token: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func enableCamera(_ enableCamera: Swift.Bool)
-  @objc func switchCamera()
-  @objc func setCameraTorchOn(_ isOn: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func setAudioRouteSpeakerphone(_ speakerphone: Swift.Bool)
-  @objc func enableAudio(_ enableAudio: Swift.Bool)
-  @objc func refuse(_ channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func busy(_ channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func setPublishResolution(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32)
-  @objc func dissolutionChannel(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func addRtcClientListener(_ listener: RKRTC.RKRtcClientListener)
-  @objc func removeRtcClientListener(_ listener: RKRTC.RKRtcClientListener)
-  @objc func addCallEventHandler(_ listener: RKRTC.RKCallEventHandler)
-  @objc func removeCallEventHandler(_ listener: RKRTC.RKCallEventHandler)
-  @objc func addCaptureInterceptor(_ listener: RKRTC.RKCaptureInterceptor)
-  @objc func removeCaptureInterceptor(_ listener: RKRTC.RKCaptureInterceptor)
-  @objc func setVideoSource(_ source: RKRTC.RKVideoSource)
-  @objc func stopVideoSource()
-  @objc func setAudioSource(_ source: RKRTC.RKAudioSource)
-  @objc func adjustPlaybackVolume(_ volume: Swift.Double)
-  @objc func findJoinedChannel(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func focus(xPercent: Swift.Float, yPercent: Swift.Float)
-  @objc func selectAudio(device: RKRTC.RKAudioDevice)
-  @objc func getAllAudioDevice() -> [Any]
-  @objc func leave(channelId: Swift.String)
-  @objc func startServerRecording(_ channelId: Swift.String, resolution: Swift.String, subStream: RKRTC.RKStreamType, bucket: Swift.String, fileName: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func stopServerRecording(_ channelId: Swift.String, save: Swift.Bool)
-  @objc func getServerRecordingFiles(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func setVideoPublishBitrate(_ bitrateMapping16to9: Swift.Array<Swift.Array<Swift.Int32>>, bitrateMapping4to3: Swift.Array<Swift.Array<Swift.Int32>>)
-  @objc func uploadLog(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
-  @objc func dispose()
+@objc public enum RKWSState : Swift.Int, RKIHandyJSON.HandyJSONEnum {
+  case idle
+  case connected
+  case disconnect
+  case closed
+  case reconnectSuggested
+  public init?(rawValue: Swift.Int)
+  public typealias RawValue = Swift.Int
+  public var rawValue: Swift.Int {
+    get
+  }
+}
+@objc public protocol RKWSProtocol : ObjectiveC.NSObjectProtocol {
+  @objc var delegate: RKRTC.RKWSDelegate? { get set }
+  @objc init(wsServer: Foundation.URL)
+  @objc func connect()
+  @objc func reconnect()
+  @objc func disconnect()
+  @objc func close()
+  @objc func send(data: Foundation.Data)
+  @objc func send(dataString: Swift.String)
+}
+@objc public protocol RKWSDelegate {
+  @objc optional func webSocketStateDidChange(state: RKRTC.RKWSState, error: Foundation.NSError?)
+  @objc optional func webSocketDidReceive(data: Foundation.Data?, message: RKRTC.RKRTCMessage)
+}
+@objc public protocol RKAudioConsumer : ObjectiveC.NSObjectProtocol {
+  @objc func consumeByteBufferFrame(inputId: Swift.String, sampleRateHz: Swift.Int32, channels: Swift.Int32, data: Swift.Int8, playDelayMS: Swift.Int32, recDelayMS: Swift.Int32, clockDrift: Swift.Int32)
+  @objc func startCustomAudio()
+  @objc func customAudio()
+  @objc func endCustomAudio()
 }
 @objc @objcMembers final public class RKWSClient : ObjectiveC.NSObject, RKRTC.RKWSProtocol {
   @objc weak final public var delegate: RKRTC.RKWSDelegate?
@@ -704,6 +616,13 @@ extension RKRTC.RKWSClient {
   @objc final public func disconnect()
   @objc final public func close()
   @objc final public func reconnect()
+}
+@objc public protocol RKCallEventHandler : ObjectiveC.NSObjectProtocol {
+  @objc func onReceiveCall(channelId: Swift.String, channelActionMsg: RKRTC.RKChannelActionMsg)
+  @objc func onCallCanceled(channelId: Swift.String, userId: Swift.String)
+}
+@objc public protocol RKCaptureInterceptor : ObjectiveC.NSObjectProtocol {
+  @objc func onIntercept(_ buffer: RKRTC.RKVideoFrame)
 }
 public enum RKWSMessageType : Swift.String, RKIHandyJSON.HandyJSONEnum {
   case HEARTBEAT_PLUS
@@ -863,38 +782,140 @@ public enum RKWSMessageType : Swift.String, RKIHandyJSON.HandyJSONEnum {
     get
   }
 }
-@objc public enum RKWSState : Swift.Int, RKIHandyJSON.HandyJSONEnum {
-  case idle
-  case connected
-  case disconnect
-  case closed
-  case reconnectSuggested
-  public init?(rawValue: Swift.Int)
-  public typealias RawValue = Swift.Int
-  public var rawValue: Swift.Int {
-    get
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKAVAnalysisModel : ObjectiveC.NSObject {
+  @objc public var userId: Swift.String
+  @objc public var packetsLost: Swift.Int32
+  @objc public var rid: Swift.String
+  @objc public var width: Swift.Int32
+  @objc public var height: Swift.Int32
+  @objc public var fps: Swift.Int32
+  @objc public var bitrate: Swift.Int32
+  @objc public var lossRate: Swift.Float
+  @objc public var qualityLimitationReason: Swift.String
+  @objc public var audioLevel: Swift.Double
+  @objc public var totalAudioEnergy: Swift.Double
+  @objc public var totalSamplesDuration: Swift.Double
+  @objc override dynamic public init()
+  @objc deinit
+}
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKRTCMessage : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
+  public var messageType: RKRTC.RKWSMessageType?
+  @objc public var messageData: Any?
+  @objc public var messageId: Swift.String?
+  @objc public var timestamp: Swift.Int64
+  @objc public var channelId: Swift.String?
+  @objc public var userId: Swift.String?
+  @objc required override dynamic public init()
+  @objc deinit
+}
+extension UIKit.UIDevice {
+  @_Concurrency.MainActor(unsafe) public static func isIPhone11Series() -> Swift.Bool
+}
+extension RKRTC.RKWebRTC : RKRTC.RKWSDelegate {
+  @objc final public func webSocketStateDidChange(state: RKRTC.RKWSState, error: Foundation.NSError?)
+  @objc final public func webSocketDidReceive(data: Foundation.Data?, message: RKRTC.RKRTCMessage)
+}
+@objc public protocol RKWebRTCInterface : ObjectiveC.NSObjectProtocol {
+  @objc var autoSubscribe: Swift.Bool { get set }
+  @objc var rtcDevice: RKRTC.RKMediaDevice { get }
+  @objc var rtcChannel: RKRTC.RKRTCChannel { get }
+  @objc func login(with appId: Swift.String, apiServer: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func logout()
+  @objc func updateToken(_ token: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func enableCamera(_ enableCamera: Swift.Bool)
+  @objc func switchCamera()
+  @objc func setCameraTorchOn(_ isOn: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func setAudioRouteSpeakerphone(_ speakerphone: Swift.Bool)
+  @objc func enableAudio(_ enableAudio: Swift.Bool)
+  @objc func refuse(_ channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func busy(_ channelId: Swift.String, inviteUserId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func setPublishResolution(width: Swift.Int32, height: Swift.Int32, fps: Swift.Int32)
+  @objc func dissolutionChannel(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func addRtcClientListener(_ listener: RKRTC.RKRtcClientListener)
+  @objc func removeRtcClientListener(_ listener: RKRTC.RKRtcClientListener)
+  @objc func addCallEventHandler(_ listener: RKRTC.RKCallEventHandler)
+  @objc func removeCallEventHandler(_ listener: RKRTC.RKCallEventHandler)
+  @objc func addCaptureInterceptor(_ listener: RKRTC.RKCaptureInterceptor)
+  @objc func removeCaptureInterceptor(_ listener: RKRTC.RKCaptureInterceptor)
+  @objc func setVideoSource(_ source: RKRTC.RKVideoSource)
+  @objc func stopVideoSource()
+  @objc func setAudioSource(_ source: RKRTC.RKAudioSource)
+  @objc func adjustPlaybackVolume(_ volume: Swift.Double)
+  @objc func findJoinedChannel(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func focus(xPercent: Swift.Float, yPercent: Swift.Float)
+  @objc func selectAudio(device: RKRTC.RKAudioDevice)
+  @objc func getAllAudioDevice() -> [Any]
+  @objc func leave(channelId: Swift.String)
+  @objc func startServerRecording(_ channelId: Swift.String, resolution: Swift.String, subStream: RKRTC.RKStreamType, bucket: Swift.String, fileName: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func stopServerRecording(_ channelId: Swift.String, save: Swift.Bool)
+  @objc func getServerRecordingFiles(_ channelId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func setVideoPublishBitrate(_ bitrateMapping16to9: Swift.Array<Swift.Array<Swift.Int32>>, bitrateMapping4to3: Swift.Array<Swift.Array<Swift.Int32>>)
+  @objc func uploadLog(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func dispose()
+}
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKMediaDeviceInfo : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
+  @objc public var audio: Swift.Bool
+  @objc public var video: Swift.Bool
+  @objc public var netQuality: Swift.Int32
+  @objc public var volumeEnergy: Swift.Int32
+  @objc public var videoWidth: Swift.Int32
+  @objc public var videoHeight: Swift.Int32
+  @objc public var screenShare: Swift.Bool
+  @objc public var portraitDegree: Swift.Int
+  @objc required override dynamic public init()
+  @objc deinit
+}
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKMediaDevice : ObjectiveC.NSObject {
+  @objc public var position: AVFoundation.AVCaptureDevice.Position
+  @objc public var isLightOn: Swift.Bool {
+    @objc get
   }
+  @objc final public let mediaDeviceInfo: RKRTC.RKMediaDeviceInfo
+  @objc deinit
+  @objc public func startCapture()
+  @objc public func stopCapture(_ c: @escaping () -> Swift.Void)
+  @objc public func switchCamera()
+  @objc public func lightTurn(_ turnOn: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc override dynamic public init()
 }
-@objc public protocol RKWSProtocol : ObjectiveC.NSObjectProtocol {
-  @objc var delegate: RKRTC.RKWSDelegate? { get set }
-  @objc init(wsServer: Foundation.URL)
-  @objc func connect()
-  @objc func reconnect()
-  @objc func disconnect()
-  @objc func close()
-  @objc func send(data: Foundation.Data)
-  @objc func send(dataString: Swift.String)
+extension RKRTC.RKMediaDevice : WebRTC.RTCVideoRenderer {
+  @objc dynamic public func renderFrame(_ frame: WebRTC.RTCVideoFrame?)
+  @objc dynamic public func setSize(_ size: CoreFoundation.CGSize)
 }
-@objc public protocol RKWSDelegate {
-  @objc optional func webSocketStateDidChange(state: RKRTC.RKWSState, error: Foundation.NSError?)
-  @objc optional func webSocketDidReceive(data: Foundation.Data?, message: RKRTC.RKRTCMessage)
+extension RKRTC.RKMediaDevice : RKRTC.RKVideoFrameConsumer {
+  @objc dynamic public func consumeByteBufferFrame(buffer: CoreVideo.CVPixelBuffer, format: RKRTC.RKVideoFormat, width: Swift.Int32, height: Swift.Int32, rotation: RKRTC.RKVideoRotation, timestamp: Swift.Int64)
+  @objc dynamic public func consumeByteArrayFrame(data: [Swift.UInt8], format: RKRTC.RKVideoFormat, width: Swift.Int32, height: Swift.Int32, rotation: RKRTC.RKVideoRotation, timestamp: Swift.Int64)
 }
+extension RKRTC.RKMediaDevice : RKRTC.RKAudioConsumer {
+  @objc dynamic public func startCustomAudio()
+  @objc dynamic public func customAudio()
+  @objc dynamic public func endCustomAudio()
+  @objc dynamic public func consumeByteBufferFrame(inputId: Swift.String, sampleRateHz: Swift.Int32, channels: Swift.Int32, data: Swift.Int8, playDelayMS: Swift.Int32, recDelayMS: Swift.Int32, clockDrift: Swift.Int32)
+}
+extension RKRTC.RKMediaDevice : WebRTC.RTCAudioSessionDelegate {
+  @objc dynamic public func audioSession(_ audioSession: WebRTC.RTCAudioSession, didCapture audioFrame: WebRTC.RTCAudioFrame) -> WebRTC.RTCAudioFrame
+}
+@objc @_inheritsConvenienceInitializers @objcMembers public class RKRecordingStateModel : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
+  public var recordingState: RKRTC.RKRecordingState?
+  @objc public var url: Swift.String?
+  @objc public var startTime: Swift.String?
+  @objc public var endTime: Swift.String?
+  @objc public var message: Swift.String?
+  @objc required override dynamic public init()
+  @objc deinit
+}
+extension RKRTC.RKRTCStreamConnectState : Swift.Equatable {}
+extension RKRTC.RKRTCStreamConnectState : Swift.Hashable {}
+extension RKRTC.RKRTCStreamConnectState : Swift.RawRepresentable {}
 extension RKRTC.SubsribeType : Swift.Equatable {}
 extension RKRTC.SubsribeType : Swift.Hashable {}
 extension RKRTC.SubsribeType : Swift.RawRepresentable {}
 extension RKRTC.RKRTCCode : Swift.Equatable {}
 extension RKRTC.RKRTCCode : Swift.Hashable {}
 extension RKRTC.RKRTCCode : Swift.RawRepresentable {}
+extension RKRTC.RKWSState : Swift.Equatable {}
+extension RKRTC.RKWSState : Swift.Hashable {}
+extension RKRTC.RKWSState : Swift.RawRepresentable {}
 extension RKRTC.RKWSMessageType : Swift.Equatable {}
 extension RKRTC.RKWSMessageType : Swift.Hashable {}
 extension RKRTC.RKWSMessageType : Swift.RawRepresentable {}
@@ -931,6 +952,3 @@ extension RKRTC.RKRecordingState : Swift.RawRepresentable {}
 extension RKRTC.RKNetworkQualityState : Swift.Equatable {}
 extension RKRTC.RKNetworkQualityState : Swift.Hashable {}
 extension RKRTC.RKNetworkQualityState : Swift.RawRepresentable {}
-extension RKRTC.RKWSState : Swift.Equatable {}
-extension RKRTC.RKWSState : Swift.Hashable {}
-extension RKRTC.RKWSState : Swift.RawRepresentable {}

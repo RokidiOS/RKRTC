@@ -277,9 +277,10 @@ SWIFT_CLASS("_TtC5RKRTC17RKAVAnalysisModel")
 @end
 
 enum RKNetworkQualityState : int32_t;
+enum RKRTCStreamConnectState : int32_t;
 
-SWIFT_PROTOCOL("_TtP5RKRTC19RKAVQualityListener_")
-@protocol RKAVQualityListener <NSObject>
+SWIFT_PROTOCOL("_TtP5RKRTC23RKAVQualityEventHandler_")
+@protocol RKAVQualityEventHandler <NSObject>
 /// 远端音频参数回调
 - (void)onRemoteAudioStatus:(NSString * _Nonnull)userId audioLevel:(double)audioLevel totalAudioEnergy:(double)totalAudioEnergy totalSamplesDuration:(double)totalSamplesDuration packetsLost:(int32_t)packetsLost;
 - (void)onRemoteVideoStatus:(NSString * _Nonnull)userId rid:(NSString * _Nullable)rid width:(int32_t)width height:(int32_t)height fps:(int32_t)fps bitrate:(int32_t)bitrate packetsLost:(int32_t)packetsLost;
@@ -288,6 +289,8 @@ SWIFT_PROTOCOL("_TtP5RKRTC19RKAVQualityListener_")
 - (void)onVideoRecordStatusWithWidth:(int32_t)width height:(int32_t)height fps:(int32_t)fps;
 - (void)onVideoPublishStatusWithRid:(NSString * _Nullable)rid width:(int32_t)width height:(int32_t)height fps:(int32_t)fps bitrate:(int32_t)bitrate qualityLimitationReason:(NSString * _Nullable)qualityLimitationReason networkQualityState:(enum RKNetworkQualityState)networkQualityState;
 - (void)onVideoStreamUnstableWithUserId:(NSString * _Nonnull)userId lossRate:(float)lossRate;
+- (void)onUserNetworkQualityWithUserId:(NSString * _Nonnull)userId networkQualityState:(enum RKNetworkQualityState)networkQualityState;
+- (void)onUserStreamConnectStateWithUserId:(NSString * _Nonnull)userId streamConnectState:(enum RKRTCStreamConnectState)streamConnectState;
 @end
 
 
@@ -1227,6 +1230,8 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 @property (nonatomic) BOOL autoSubscribe;
 /// 加入频道
 - (void)joinWithChannelId:(NSString * _Nonnull)channelId audio:(BOOL)audio video:(BOOL)video password:(NSString * _Nullable)password bitrate:(int32_t)bitrate maxDelay:(int32_t)maxDelay inviteUserId:(NSString * _Nullable)inviteUserId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 加入频道，会等待音视频连接成功
+- (void)joinWithChannelId:(NSString * _Nonnull)channelId audio:(BOOL)audio video:(BOOL)video password:(NSString * _Nullable)password bitrate:(int32_t)bitrate maxDelay:(int32_t)maxDelay inviteUserId:(NSString * _Nullable)inviteUserId timeout:(int32_t)timeout onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 离开房间
 - (void)leave:(NSString * _Nullable)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 邀请用户加入频道
@@ -1242,6 +1247,8 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 - (void)subscribeWithUserId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 订阅视频流带媒体选择
 - (void)subscribeWithUserId:(NSString * _Nonnull)userId mediaType:(enum SubsribeType)mediaType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+/// 获取音视频流连接状态
+- (enum RKRTCStreamConnectState)getUserStreamStateWithUserId:(NSString * _Nonnull)userId SWIFT_WARN_UNUSED_RESULT;
 /// 订阅媒体类型切换
 - (void)swicthSubscribeTypeWithUserId:(NSString * _Nonnull)userId mediaType:(enum SubsribeType)mediaType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 取消订阅视频流
@@ -1261,7 +1268,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 /// 监听频道事件
 - (void)setChannelEventHandler:(id <RKChannelEventHandler> _Nullable)channelEventHandler;
 /// 音视频质量数据回调
-- (void)setQualityHandler:(id <RKAVQualityListener> _Nullable)qualityListener;
+- (void)setQualityHandler:(id <RKAVQualityEventHandler> _Nullable)qualityListener;
 /// 设置拓展参数
 - (void)setExtraParams:(NSString * _Nonnull)extras onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 获取拓展参数
@@ -1283,8 +1290,9 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 
 @interface RKRTCChannel (SWIFT_EXTENSION(RKRTC)) <RKRTCChannelInterface>
 - (void)joinWithChannelId:(NSString * _Nonnull)channelId audio:(BOOL)audio video:(BOOL)video password:(NSString * _Nullable)password bitrate:(int32_t)bitrate maxDelay:(int32_t)maxDelay inviteUserId:(NSString * _Nullable)inviteUserId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)joinWithChannelId:(NSString * _Nonnull)channelId audio:(BOOL)audio video:(BOOL)video password:(NSString * _Nullable)password bitrate:(int32_t)bitrate maxDelay:(int32_t)maxDelay inviteUserId:(NSString * _Nullable)inviteUserId timeout:(int32_t)timeout onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 加入频道
-- (void)realJoinWithChannelId:(NSString * _Nonnull)channelId audio:(BOOL)audio video:(BOOL)video password:(NSString * _Nullable)password bitrate:(int32_t)bitrate maxDelay:(int32_t)maxDelay inviteUserId:(NSString * _Nullable)inviteUserId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)realJoinWithChannelId:(NSString * _Nonnull)channelId audio:(BOOL)audio video:(BOOL)video password:(NSString * _Nullable)password bitrate:(int32_t)bitrate maxDelay:(int32_t)maxDelay inviteUserId:(NSString * _Nullable)inviteUserId timeout:(int32_t)timeout onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 离开房间
 - (void)leave:(NSString * _Nullable)channelId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 邀请用户加入频道
@@ -1295,6 +1303,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 - (void)subscribeWithUserId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 订阅视频流带媒体选择
 - (void)subscribeWithUserId:(NSString * _Nonnull)userId mediaType:(enum SubsribeType)mediaType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (enum RKRTCStreamConnectState)getUserStreamStateWithUserId:(NSString * _Nonnull)userId SWIFT_WARN_UNUSED_RESULT;
 /// 订阅媒体类型切换
 - (void)swicthSubscribeTypeWithUserId:(NSString * _Nonnull)userId mediaType:(enum SubsribeType)mediaType onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 取消订阅视频流
@@ -1312,7 +1321,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC21RKRTCChannelInterface_")
 - (void)publishLocalVideoStream:(BOOL)publish;
 /// 监听频道事件
 - (void)setChannelEventHandler:(id <RKChannelEventHandler> _Nullable)channelEventHandler;
-- (void)setQualityHandler:(id <RKAVQualityListener> _Nullable)qualityListener;
+- (void)setQualityHandler:(id <RKAVQualityEventHandler> _Nullable)qualityListener;
 /// 设置拓展参数
 - (void)setExtraParams:(NSString * _Nonnull)extras onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 获取拓展参数
@@ -1424,6 +1433,12 @@ SWIFT_CLASS("_TtC5RKRTC12RKRTCMessage")
 @property (nonatomic, copy) NSString * _Nullable userId;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
+
+typedef SWIFT_ENUM(int32_t, RKRTCStreamConnectState, open) {
+  RKRTCStreamConnectStateDisconnected = 0,
+  RKRTCStreamConnectStateConnecting = 1,
+  RKRTCStreamConnectStateConnected = 2,
+};
 
 
 SWIFT_CLASS("_TtC5RKRTC15RKRecordingFile")
@@ -1638,13 +1653,13 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, strong) RKWebRTC * _Nonnull sh
 @end
 
 
-
 @interface RKWebRTC (SWIFT_EXTENSION(RKRTC)) <RKWSDelegate>
 /// 连接状态变更
 - (void)webSocketStateDidChangeWithState:(enum RKWSState)state error:(NSError * _Nullable)error;
 /// 收到数据
 - (void)webSocketDidReceiveWithData:(NSData * _Nullable)data message:(RKRTCMessage * _Nonnull)message;
 @end
+
 
 
 
