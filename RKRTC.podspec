@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'RKRTC'
-  s.version          = '4.5.0-beta1'
+  s.version          = '4.5.0'
   s.summary          = 'iOS Rokid RTC SDK .'
   s.description      = <<-DESC
   Rokid iOS rtc SDK .
