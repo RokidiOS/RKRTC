@@ -1382,6 +1382,8 @@ typedef SWIFT_ENUM(NSInteger, RKRTCCode, open) {
   RKRTCCodeCHANNEL_MEMBERS_IS_FULL = 10016,
 /// 用户列表为空
   RKRTCCodeUSER_LIST_IS_EMPTY = 10017,
+/// 当前已处于共享状态
+  RKRTCCodeALREADY_SHARING = 10026,
 /// 当前APPID 会议人数达到上限
   RKRTCCodeUSER_ALREADY_FULL = 10028,
 /// 发送消息体为空
