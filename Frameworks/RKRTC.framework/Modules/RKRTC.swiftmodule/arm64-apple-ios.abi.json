@@ -1752,39 +1752,6 @@
             "fixedbinaryorder": 2
           },
           {
-            "kind": "Constructor",
-            "name": "init",
-            "printedName": "init(rawValue:)",
-            "children": [
-              {
-                "kind": "TypeNominal",
-                "name": "Optional",
-                "printedName": "RKRTC.RKRTCStreamConnectState?",
-                "children": [
-                  {
-                    "kind": "TypeNominal",
-                    "name": "RKRTCStreamConnectState",
-                    "printedName": "RKRTC.RKRTCStreamConnectState",
-                    "usr": "c:@M@RKRTC@E@RKRTCStreamConnectState"
-                  }
-                ],
-                "usr": "s:Sq"
-              },
-              {
-                "kind": "TypeNominal",
-                "name": "Int32",
-                "printedName": "Swift.Int32",
-                "usr": "s:s5Int32V"
-              }
-            ],
-            "declKind": "Constructor",
-            "usr": "s:5RKRTC23RKRTCStreamConnectStateO8rawValueACSgs5Int32V_tcfc",
-            "mangledName": "$s5RKRTC23RKRTCStreamConnectStateO8rawValueACSgs5Int32V_tcfc",
-            "moduleName": "RKRTC",
-            "implicit": true,
-            "init_kind": "Designated"
-          },
-          {
             "kind": "Var",
             "name": "rawValue",
             "printedName": "rawValue",
@@ -1822,6 +1789,39 @@
                 "accessorKind": "get"
               }
             ]
+          },
+          {
+            "kind": "Constructor",
+            "name": "init",
+            "printedName": "init(rawValue:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Optional",
+                "printedName": "RKRTC.RKRTCStreamConnectState?",
+                "children": [
+                  {
+                    "kind": "TypeNominal",
+                    "name": "RKRTCStreamConnectState",
+                    "printedName": "RKRTC.RKRTCStreamConnectState",
+                    "usr": "c:@M@RKRTC@E@RKRTCStreamConnectState"
+                  }
+                ],
+                "usr": "s:Sq"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Int32",
+                "printedName": "Swift.Int32",
+                "usr": "s:s5Int32V"
+              }
+            ],
+            "declKind": "Constructor",
+            "usr": "s:5RKRTC23RKRTCStreamConnectStateO8rawValueACSgs5Int32V_tcfc",
+            "mangledName": "$s5RKRTC23RKRTCStreamConnectStateO8rawValueACSgs5Int32V_tcfc",
+            "moduleName": "RKRTC",
+            "implicit": true,
+            "init_kind": "Designated"
           }
         ],
         "declKind": "Enum",
@@ -48554,49 +48554,77 @@
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKPeerconnection.swift",
       "kind": "BooleanLiteral",
-      "offset": 1035,
+      "offset": 1032,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKPeerconnection.swift",
       "kind": "StringLiteral",
-      "offset": 1142,
+      "offset": 1139,
       "length": 88,
       "value": "\"NQ: \""
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKPeerconnection.swift",
       "kind": "StringLiteral",
-      "offset": 1158,
+      "offset": 1155,
       "length": 3,
       "value": "\" set network quality \""
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKPeerconnection.swift",
       "kind": "StringLiteral",
-      "offset": 1199,
+      "offset": 1196,
       "length": 2,
       "value": "\" -> \""
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKPeerconnection.swift",
       "kind": "StringLiteral",
-      "offset": 1229,
+      "offset": 1226,
+      "length": 2,
+      "value": "\"\""
+    },
+    {
+      "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKPeerconnection.swift",
+      "kind": "StringLiteral",
+      "offset": 1496,
+      "length": 97,
+      "value": "\"NQ: \""
+    },
+    {
+      "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKPeerconnection.swift",
+      "kind": "StringLiteral",
+      "offset": 1512,
+      "length": 3,
+      "value": "\" set stream connect state \""
+    },
+    {
+      "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKPeerconnection.swift",
+      "kind": "StringLiteral",
+      "offset": 1558,
+      "length": 2,
+      "value": "\" -> \""
+    },
+    {
+      "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKPeerconnection.swift",
+      "kind": "StringLiteral",
+      "offset": 1592,
       "length": 2,
       "value": "\"\""
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKPeerconnection.swift",
       "kind": "BooleanLiteral",
-      "offset": 1764,
+      "offset": 2230,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKPeerconnection.swift",
       "kind": "StringLiteral",
-      "offset": 747,
+      "offset": 744,
       "length": 14,
       "value": "\"RKRTC.RKPeerconntion\""
     },
@@ -49884,112 +49912,112 @@
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 6503,
+      "offset": 6499,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 7217,
+      "offset": 7213,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 7252,
+      "offset": 7248,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 7294,
+      "offset": 7290,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 7336,
+      "offset": 7332,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 7376,
+      "offset": 7372,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 9140,
+      "offset": 9136,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 9176,
+      "offset": 9172,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 9219,
+      "offset": 9215,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 9262,
+      "offset": 9258,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 9303,
+      "offset": 9299,
       "length": 5,
       "value": "false"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 13263,
+      "offset": 13259,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 13314,
+      "offset": 13310,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 13372,
+      "offset": 13368,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 13430,
+      "offset": 13426,
       "length": 4,
       "value": "true"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCSessions.swift",
       "kind": "BooleanLiteral",
-      "offset": 13486,
+      "offset": 13482,
       "length": 5,
       "value": "false"
     },
@@ -52222,42 +52250,42 @@
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCStatusAnalysis.swift",
       "kind": "FloatLiteral",
-      "offset": 24785,
+      "offset": 25004,
       "length": 3,
       "value": "0.1"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCStatusAnalysis.swift",
       "kind": "IntegerLiteral",
-      "offset": 24885,
+      "offset": 25104,
       "length": 1,
       "value": "3"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCStatusAnalysis.swift",
       "kind": "IntegerLiteral",
-      "offset": 24959,
+      "offset": 25178,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCStatusAnalysis.swift",
       "kind": "IntegerLiteral",
-      "offset": 25029,
+      "offset": 25248,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCStatusAnalysis.swift",
       "kind": "IntegerLiteral",
-      "offset": 25109,
+      "offset": 25328,
       "length": 1,
       "value": "0"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKRTCStatusAnalysis.swift",
       "kind": "StringLiteral",
-      "offset": 25149,
+      "offset": 25368,
       "length": 2,
       "value": "\"\""
     }
