@@ -877,6 +877,7 @@ extension RKRTC.RKWebRTC : RKRTC.RKWSDelegate {
   @objc public func stopCapture(_ c: @escaping () -> Swift.Void)
   @objc public func switchCamera()
   @objc public func lightTurn(_ turnOn: Swift.Bool, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc public func ignorePortraitOrientation(_ ignore: Swift.Bool)
   @objc override dynamic public init()
 }
 extension RKRTC.RKMediaDevice : WebRTC.RTCVideoRenderer {

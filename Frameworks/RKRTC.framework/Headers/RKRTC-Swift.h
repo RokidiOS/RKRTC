@@ -636,6 +636,7 @@ SWIFT_CLASS("_TtC5RKRTC13RKMediaDevice")
 - (void)stopCapture:(void (^ _Nonnull)(void))c;
 - (void)switchCamera;
 - (void)lightTurn:(BOOL)turnOn onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)ignorePortraitOrientation:(BOOL)ignore;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 

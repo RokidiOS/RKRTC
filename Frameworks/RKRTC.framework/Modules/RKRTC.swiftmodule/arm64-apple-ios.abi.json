@@ -47133,6 +47133,33 @@
             "funcSelfKind": "NonMutating"
           },
           {
+            "kind": "Function",
+            "name": "ignorePortraitOrientation",
+            "printedName": "ignorePortraitOrientation(_:)",
+            "children": [
+              {
+                "kind": "TypeNominal",
+                "name": "Void",
+                "printedName": "()"
+              },
+              {
+                "kind": "TypeNominal",
+                "name": "Bool",
+                "printedName": "Swift.Bool",
+                "usr": "s:Sb"
+              }
+            ],
+            "declKind": "Func",
+            "usr": "c:@M@RKRTC@objc(cs)RKMediaDevice(im)ignorePortraitOrientation:",
+            "mangledName": "$s5RKRTC13RKMediaDeviceC25ignorePortraitOrientationyySbF",
+            "moduleName": "RKRTC",
+            "declAttributes": [
+              "AccessControl",
+              "ObjC"
+            ],
+            "funcSelfKind": "NonMutating"
+          },
+          {
             "kind": "Constructor",
             "name": "init",
             "printedName": "init()",
@@ -52166,21 +52193,21 @@
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKMediaDevice.swift",
       "kind": "IntegerLiteral",
-      "offset": 9019,
+      "offset": 9227,
       "length": 4,
       "value": "1920"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKMediaDevice.swift",
       "kind": "IntegerLiteral",
-      "offset": 9041,
+      "offset": 9249,
       "length": 4,
       "value": "1080"
     },
     {
       "filePath": "\/Users\/yubo\/Workspace\/rkrtc\/RKRTC\/Classes\/RTC\/RKMediaDevice.swift",
       "kind": "IntegerLiteral",
-      "offset": 9060,
+      "offset": 9268,
       "length": 2,
       "value": "30"
     },
