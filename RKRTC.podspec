@@ -1,7 +1,7 @@
 
 Pod::Spec.new do |s|
   s.name             = 'RKRTC'
-  s.version          = '4.6.0'
+  s.version          = '4.7.0'
   s.summary          = 'iOS Rokid RTC SDK .'
   s.description      = <<-DESC
   Rokid iOS rtc SDK .
@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.homepage         = 'https://github.com/RokidiOS/RKRTCSDK'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'amos' => 'xiaodong.chen@rokid.com' }
-  s.source = { :git => "https://github.com/RokidiOS/RKRTC.git", :branch => "4.6.0" }
+  s.source = { :git => "https://github.com/RokidiOS/RKRTC.git", :branch => "4.7.0_beta1" }
 
   s.ios.deployment_target = '10.0'
   

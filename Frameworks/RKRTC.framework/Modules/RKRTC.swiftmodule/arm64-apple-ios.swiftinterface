@@ -425,6 +425,10 @@ extension RKRTC.RKRTCAPIs : Moya.TargetType {
   @objc public var autoSubscribe: Swift.Bool
   public var trackSuccesBlockDict: [Swift.String : (() -> Swift.Void)]
   @objc public var enableSimulcast: Swift.Bool
+  @objc public var maintainResolution: Swift.Bool {
+    @objc get
+    @objc set
+  }
   @objc deinit
   @objc override dynamic public init()
 }

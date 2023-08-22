@@ -1201,6 +1201,7 @@ SWIFT_CLASS("_TtC5RKRTC12RKRTCChannel")
 @property (nonatomic, copy) NSDictionary<NSString *, UIView *> * _Nonnull videoViews;
 @property (nonatomic) BOOL autoSubscribe;
 @property (nonatomic) BOOL enableSimulcast;
+@property (nonatomic) BOOL maintainResolution;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end
 
