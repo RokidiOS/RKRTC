@@ -612,6 +612,13 @@ SWIFT_CLASS("_TtC5RKRTC14RKIceCandidate")
 @end
 
 
+SWIFT_CLASS("_TtC5RKRTC11RKIceServer")
+@interface RKIceServer : NSObject
+- (nonnull instancetype)initWithUrlStrings:(NSArray<NSString *> * _Nonnull)urlStrings username:(NSString * _Nullable)username credential:(NSString * _Nullable)credential OBJC_DESIGNATED_INITIALIZER;
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+
 SWIFT_CLASS("_TtC5RKRTC15RKJoinedChannel")
 @interface RKJoinedChannel : NSObject
 @property (nonatomic, copy) NSString * _Nonnull channelId;
@@ -1428,6 +1435,17 @@ typedef SWIFT_ENUM(int32_t, RKRTCConnectionState, open) {
 };
 
 
+SWIFT_CLASS("_TtC5RKRTC16RKRTCLoginParams")
+@interface RKRTCLoginParams : NSObject
+@property (nonatomic, copy) NSString * _Null_unspecified userId;
+@property (nonatomic, copy) NSString * _Null_unspecified appId;
+@property (nonatomic, copy) NSString * _Null_unspecified apiServer;
+@property (nonatomic, copy) NSArray<RKIceServer *> * _Nullable iceServers;
+@property (nonatomic, copy) NSString * _Nullable wsServer;
+- (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
+@end
+
+
 SWIFT_CLASS("_TtC5RKRTC12RKRTCMessage")
 @interface RKRTCMessage : NSObject
 @property (nonatomic) id _Nullable messageData;
@@ -1685,6 +1703,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 /// \param token 用户token
 ///
 - (void)loginWith:(NSString * _Nonnull)appId apiServer:(NSString * _Nonnull)apiServer userId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)loginWith:(RKRTCLoginParams * _Nonnull)params onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 登出
 - (void)logout;
 /// 更新token
@@ -1837,6 +1856,7 @@ SWIFT_PROTOCOL("_TtP5RKRTC17RKWebRTCInterface_")
 - (void)uploadLogOnSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 /// 登录
 - (void)loginWith:(NSString * _Nonnull)appId apiServer:(NSString * _Nonnull)apiServer userId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
+- (void)loginWith:(RKRTCLoginParams * _Nonnull)params onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;
 - (void)logout;
 /// 刷新token
 - (void)updateToken:(NSString * _Nonnull)token userId:(NSString * _Nonnull)userId onSuccess:(void (^ _Nullable)(id _Nullable))onSuccess onFailed:(void (^ _Nullable)(NSError * _Nullable))onFailed;

@@ -64,6 +64,7 @@ import _StringProcessing
 extension RKRTC.RKWebRTC : RKRTC.RKWebRTCInterface {
   @objc final public func uploadLog(onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc final public func login(with appId: Swift.String, apiServer: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc final public func login(with params: RKRTC.RKRTCLoginParams, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc final public func logout()
   @objc final public func updateToken(_ token: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc final public func enableCamera(_ enableCamera: Swift.Bool)
@@ -820,11 +821,21 @@ extension RKRTC.RKWebRTC : RKRTC.RKWSDelegate {
   @objc final public func webSocketStateDidChange(state: RKRTC.RKWSState, error: Foundation.NSError?)
   @objc final public func webSocketDidReceive(data: Foundation.Data?, message: RKRTC.RKRTCMessage)
 }
+@_inheritsConvenienceInitializers @objc public class RKRTCLoginParams : ObjectiveC.NSObject {
+  @objc public var userId: Swift.String!
+  @objc public var appId: Swift.String!
+  @objc public var apiServer: Swift.String!
+  @objc public var iceServers: [RKRTC.RKIceServer]?
+  @objc public var wsServer: Swift.String?
+  @objc override dynamic public init()
+  @objc deinit
+}
 @objc public protocol RKWebRTCInterface : ObjectiveC.NSObjectProtocol {
   @objc var autoSubscribe: Swift.Bool { get set }
   @objc var rtcDevice: RKRTC.RKMediaDevice { get }
   @objc var rtcChannel: RKRTC.RKRTCChannel { get }
   @objc func login(with appId: Swift.String, apiServer: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
+  @objc func login(with params: RKRTC.RKRTCLoginParams, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func logout()
   @objc func updateToken(_ token: Swift.String, userId: Swift.String, onSuccess: RKRTC.RKOnSuccess?, onFailed: RKRTC.RKOnFailed?)
   @objc func enableCamera(_ enableCamera: Swift.Bool)
@@ -900,6 +911,14 @@ extension RKRTC.RKMediaDevice : RKRTC.RKAudioConsumer {
 }
 extension RKRTC.RKMediaDevice : WebRTC.RTCAudioSessionDelegate {
   @objc dynamic public func audioSession(_ audioSession: WebRTC.RTCAudioSession, didCapture audioFrame: WebRTC.RTCAudioFrame) -> WebRTC.RTCAudioFrame
+}
+@objc @_inheritsConvenienceInitializers public class RKIceServer : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
+  public var urls: [Swift.String]
+  public var userName: Swift.String?
+  public var password: Swift.String?
+  @objc public init(urlStrings: [Swift.String], username: Swift.String?, credential: Swift.String?)
+  @objc required override dynamic public init()
+  @objc deinit
 }
 @objc @_inheritsConvenienceInitializers @objcMembers public class RKRecordingStateModel : ObjectiveC.NSObject, RKIHandyJSON.HandyJSON {
   public var recordingState: RKRTC.RKRecordingState?
